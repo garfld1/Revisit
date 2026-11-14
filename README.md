@@ -1,4 +1,4 @@
-# Recall — Notes Review
+# Revisit — Notes Review
 
 A minimalist spaced-repetition tracker for study topics. Add a topic, review it when it's due, and grade how well you recalled it. Scheduling uses the SM-2 algorithm. All data stays in your browser's `localStorage`.
 
@@ -24,4 +24,4 @@ npm run dev      # http://localhost:4317
 
 `npm run build` writes a static bundle to `dist/`. You can also open `index.html` directly in a browser.
 
-Data from earlier versions (`recall_topics_v1`) is picked up automatically.
+Data from earlier versions (stored under `recall_topics_v1`, from when the app was called Recall) is picked up automatically.
