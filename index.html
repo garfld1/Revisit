@@ -181,6 +181,9 @@ button{font-family:inherit; cursor:pointer; border:none;}
 .grades{display:grid; grid-template-columns:1fr 1fr; gap:8px;}
 .grades button{padding:13px 8px; border-radius:9px; font-size:0.88rem; font-weight:600; border:1px solid var(--line); background:var(--bg); color:var(--ink);}
 .grades button:active{transform:scale(0.98);}
+.grades button{position:relative;}
+.grades kbd{position:absolute; top:5px; right:7px; font-family:inherit; font-size:0.68rem; font-weight:500; color:var(--ink-dim); opacity:0.7;}
+@media (hover:none){.grades kbd{display:none;}}
 .g-again{color:#B5533C !important;}
 .g-hard{color:var(--due) !important;}
 .g-good{color:var(--accent) !important;}
@@ -366,12 +369,12 @@ body.selecting .toast{bottom:calc(84px + env(safe-area-inset-bottom, 0px));}
 <div class="panel" id="panel">
   <div class="panel-card">
     <h2 id="panelName"></h2>
-    <p>How well did you recall this just now?</p>
+    <p>Explain it out loud first, then grade.</p>
     <div class="grades">
-      <button class="g-again" onclick="grade(0)">Again<br><small>forgot it</small></button>
-      <button class="g-hard" onclick="grade(3)">Hard<br><small>shaky</small></button>
-      <button class="g-good" onclick="grade(4)">Good<br><small>solid</small></button>
-      <button class="g-easy" onclick="grade(5)">Easy<br><small>no effort</small></button>
+      <button class="g-again" onclick="grade(1)">Blanked<br><small>needed help</small><kbd>1</kbd></button>
+      <button class="g-hard" onclick="grade(3)">Shaky<br><small>got the gist</small><kbd>2</kbd></button>
+      <button class="g-good" onclick="grade(4)">Mostly<br><small>small gaps</small><kbd>3</kbd></button>
+      <button class="g-easy" onclick="grade(5)">Solid<br><small>from memory</small><kbd>4</kbd></button>
     </div>
     <button class="panel-close" onclick="closePanel()">Cancel</button>
   </div>
@@ -1461,6 +1464,14 @@ document.querySelectorAll('.panel').forEach(p=>p.addEventListener('click', e=>{
   if(e.target === p) panelClosers[p.id]();
 }));
 document.addEventListener('keydown', e=>{
+  if(reviewingId && document.getElementById('panel').classList.contains('open')){
+    const map = {'1':1, '2':3, '3':4, '4':5};
+    if(map[e.key] !== undefined && !e.metaKey && !e.ctrlKey && !e.altKey){
+      e.preventDefault();
+      grade(map[e.key]);
+      return;
+    }
+  }
   if(e.key !== 'Escape') return;
   const open = document.querySelector('.panel.open');
   if(open) panelClosers[open.id]();
