@@ -157,6 +157,13 @@ button{font-family:inherit; cursor:pointer; border:none;}
   background:var(--accent-soft); color:var(--accent); border-radius:7px; padding:7px 12px;
   font-size:0.85rem; font-weight:600;
 }
+.todaybtn{
+  background:none; color:var(--ink-dim); border-radius:7px; padding:7px 10px; font-size:0.82rem; font-weight:600;
+  opacity:0; transition:opacity .15s ease;
+}
+.todaybtn:hover{color:var(--accent); background:var(--accent-soft);}
+.topic:hover .todaybtn, .todaybtn:focus-visible{opacity:1;}
+@media (hover:none){ .todaybtn{opacity:0.75;} }
 .delbtn{background:none; color:var(--ink-dim); font-size:1.1rem; padding:4px 6px; border-radius:6px; line-height:1;}
 .delbtn:hover{color:var(--due);}
 .empty{color:var(--ink-dim); font-size:0.9rem; padding:18px 0 28px; font-style:italic;}
@@ -426,7 +433,7 @@ body.selecting .toast{bottom:calc(84px + env(safe-area-inset-bottom, 0px));}
 
 <div class="toast" id="toast" role="status" aria-live="polite">
   <span id="toastMsg"></span>
-  <button onclick="undoDelete()">Undo</button>
+  <button onclick="runUndo()">Undo</button>
 </div>
 
 <script>
@@ -448,7 +455,7 @@ let navPaths = [];
 let editingPath = null;
 let selecting = false;
 let selected = new Set();
-let lastDeleted = null;
+let undoFn = null;
 let toastTimer = null;
 let pendingConfirm = null;
 let addField = null;
@@ -592,8 +599,7 @@ function removeTopics(ids, message){
   const idSet = new Set(ids);
   const removed = topics.filter(t => idSet.has(t.id));
   if(!removed.length) return;
-  lastDeleted = {
-    topics: removed,
+  const snapshot = {
     archived: meta.archived.slice(),
     expanded: meta.expanded.slice(),
     active: activeCategory
@@ -601,26 +607,43 @@ function removeTopics(ids, message){
   topics = topics.filter(t => !idSet.has(t.id));
   ids.forEach(id => selected.delete(id));
   save(); saveMeta(); render();
-  showToast(message);
+  showToast(message, () => {
+    const existing = new Set(topics.map(t => t.id));
+    topics.push(...removed.filter(t => !existing.has(t.id)));
+    meta.archived = [...new Set([...meta.archived, ...snapshot.archived])];
+    meta.expanded = [...new Set([...meta.expanded, ...snapshot.expanded])];
+    save(); saveMeta();
+    if(snapshot.active !== activeCategory) setActiveCategory(snapshot.active);
+    else render();
+  });
 }
 
-function undoDelete(){
-  if(!lastDeleted) return;
-  const existing = new Set(topics.map(t => t.id));
-  topics.push(...lastDeleted.topics.filter(t => !existing.has(t.id)));
-  meta.archived = [...new Set([...meta.archived, ...lastDeleted.archived])];
-  meta.expanded = [...new Set([...meta.expanded, ...lastDeleted.expanded])];
-  const active = lastDeleted.active;
-  lastDeleted = null;
-  save(); saveMeta();
+// Pulls a topic's next review forward to today. Its interval and ease are
+// untouched, so grading it afterwards schedules from there as usual.
+function doToday(id){
+  const t = topics.find(x => x.id === id);
+  const today = todayStr();
+  if(!t || t.due <= today) return;
+  const prevDue = t.due;
+  t.due = today;
+  save(); render();
+  showToast(`“${t.name}” is due today`, () => {
+    const cur = topics.find(x => x.id === id);
+    if(cur && cur.due === today){ cur.due = prevDue; save(); }
+    render();
+  });
+}
+
+function runUndo(){
+  const fn = undoFn;
+  undoFn = null;
   hideToast();
-  if(active !== activeCategory) setActiveCategory(active);
-  else render();
+  if(fn) fn();
 }
 
-function showToast(message, undoable = true){
-  if(!undoable) lastDeleted = null;
-  document.querySelector('#toast button').style.display = undoable ? '' : 'none';
+function showToast(message, onUndo = null){
+  undoFn = onUndo;
+  document.querySelector('#toast button').style.display = onUndo ? '' : 'none';
   document.getElementById('toastMsg').textContent = message;
   document.getElementById('toast').classList.add('show');
   clearTimeout(toastTimer);
@@ -762,7 +785,7 @@ function doMove(){
   if(target.includes(SEP) && !meta.expanded.includes(topOf(target))) meta.expanded.push(topOf(target));
   save(); saveMeta(); render();
   const what = changed.length === 1 ? `“${changed[0].name}”` : plural(changed.length, 'topic');
-  showToast(`Moved ${what} to ${target ? crumbs(target) : 'Uncategorized'}`, false);
+  showToast(`Moved ${what} to ${target ? crumbs(target) : 'Uncategorized'}`);
 }
 
 function startRename(id, el){
@@ -861,7 +884,9 @@ function rowHtml(t, isDue, showCat = true){
     <div class="topic ${isDue?'due':''}">
       <div class="tbody"><div class="tname editable" tabindex="0" title="Click to rename" onclick="startRename('${t.id}', this)" onkeydown="if(event.key==='Enter'){event.preventDefault();startRename('${t.id}', this)}">${escapeHtml(t.name)}</div><div class="tmeta">${escapeHtml(metaCore)}${crumbButton(t, label)}</div></div>
       <div class="topic-right">
-        ${isDue ? `<button class="reviewbtn" onclick="openPanel('${t.id}')">Review</button>` : ''}
+        ${isDue
+          ? `<button class="reviewbtn" onclick="openPanel('${t.id}')">Review</button>`
+          : `<button class="todaybtn" onclick="doToday('${t.id}')" title="Move this review to today">Do today</button>`}
         <button class="delbtn" onclick="deleteTopic('${t.id}')" aria-label="Delete">×</button>
       </div>
     </div>`;

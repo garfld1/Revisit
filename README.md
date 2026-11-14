@@ -22,6 +22,10 @@ Click (or tap) a topic's name to rename it in place. Enter or clicking away save
 
 Click the course line under a topic (e.g. `Campbell Biology › Chapter 10`) to move it: pick a chapter to move it down a level, or backspace the chapter to file it under the course alone. Uncategorized topics show "Add to course" on hover. *Select → Move* does the same for many topics at once.
 
+## Reviewing early
+
+Hover an upcoming topic (or look for the faint button on mobile) and click **Do today** to pull its review forward to today. It moves into *Due today*, and grading it schedules the next review from there as usual. An **Undo** message puts it back on its original date.
+
 ## Calendar
 
 Switch the view to **Calendar** to see a month grid of what's due. Each day shows how many topics are scheduled, with busier days tinted a little more strongly; overdue topics are counted on today so nothing hides in the past. Click a day to list its topics below the grid (review, rename, and move all work there). The calendar follows the sidebar, so selecting a course or chapter shows just its schedule. It's read-only — the schedule itself comes from your grades.
