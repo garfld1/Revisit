@@ -120,8 +120,7 @@ button{font-family:inherit; cursor:pointer; border:none;}
 }
 .addrow button:active{opacity:0.85;}
 .addrow{flex-wrap:wrap;}
-.addrow input#newTopic{flex:2 1 200px;}
-.addrow input#newCategory{flex:1 1 150px;}
+.addrow input#newTopic{flex:1 1 180px;}
 .sortrow{display:flex; align-items:center; justify-content:space-between; margin:0 0 16px;}
 .segctrl{display:flex; gap:3px; background:var(--accent-soft); padding:3px; border-radius:8px;}
 .seg{padding:6px 11px; border-radius:6px; font-size:0.8rem; font-weight:600; color:var(--ink-dim); background:transparent;}
@@ -177,6 +176,86 @@ button{font-family:inherit; cursor:pointer; border:none;}
 .textbtn:hover{color:var(--ink); background:var(--accent-soft);}
 .primarybtn{background:var(--accent); color:var(--bg); border-radius:9px; padding:9px 18px; font-size:0.88rem; font-weight:600;}
 .primarybtn:disabled{opacity:0.45; cursor:default;}
+.dangerbtn{background:#B5533C; color:#fff; border-radius:9px; padding:9px 18px; font-size:0.88rem; font-weight:600;}
+.dangerbtn:disabled{opacity:0.45; cursor:default;}
+
+.pathfield{
+  position:relative; flex:1.2 1 230px; min-width:0; display:flex; align-items:center; gap:6px;
+  padding:0 13px; border:1px solid var(--line); border-radius:9px; background:var(--card); cursor:text;
+}
+.pathfield.in-panel{background:var(--bg);}
+.pathfield:focus-within{outline:2px solid var(--accent); outline-offset:1px;}
+.pathfield .pf-input{
+  flex:1; width:0; min-width:0; border:none; outline:none; background:transparent; padding:11px 0;
+  font-size:0.95rem; color:var(--ink); font-family:inherit; border-radius:0;
+}
+.pathfield .pf-input:focus{outline:none;}
+.pathfield .pf-chip{
+  display:inline-flex; align-items:center; gap:4px; max-width:66%; flex-shrink:0;
+  padding:4px 8px; border-radius:6px; background:var(--accent-soft); color:var(--accent);
+  font-size:0.84rem; font-weight:600; white-space:nowrap;
+}
+.pathfield .pf-chip[hidden]{display:none;}
+.pf-chip span{overflow:hidden; text-overflow:ellipsis;}
+.pf-menu{
+  position:absolute; left:0; right:0; top:calc(100% + 4px); z-index:20; display:none;
+  background:var(--card); border:1px solid var(--line); border-radius:9px; padding:4px;
+  box-shadow:0 8px 24px rgba(0,0,0,0.08); max-height:244px; overflow-y:auto;
+}
+.pf-menu.open{display:block;}
+.pf-opt{
+  display:flex; justify-content:space-between; gap:10px; padding:8px 10px; border-radius:6px;
+  font-size:0.88rem; color:var(--ink); cursor:pointer;
+}
+.pf-opt.hl, .pf-opt:hover{background:var(--accent-soft);}
+.pf-opt small{color:var(--ink-dim); flex-shrink:0;}
+.pf-opt.pf-hint{color:var(--ink-dim); font-size:0.82rem;}
+
+.linkbtn{background:none; color:var(--ink-dim); font-size:0.82rem; font-weight:600; padding:6px 8px; border-radius:7px;}
+.linkbtn:hover{color:var(--accent); background:var(--accent-soft);}
+.sort-right{display:flex; align-items:center; gap:6px;}
+.topic.selectable{cursor:pointer; user-select:none; -webkit-user-select:none;}
+.topic.selectable:focus-visible{outline:2px solid var(--accent); outline-offset:1px;}
+.topic.selected{border-color:var(--accent); box-shadow:inset 0 0 0 1px var(--accent);}
+.check{
+  width:20px; height:20px; border-radius:6px; border:1.5px solid var(--ink-dim); opacity:0.6;
+  display:inline-flex; align-items:center; justify-content:center; font-size:0.75rem; color:var(--bg);
+}
+.check.on{background:var(--accent); border-color:var(--accent); opacity:1;}
+.check.on::after{content:"✓"; font-weight:700;}
+
+.selbar{
+  position:fixed; left:50%; transform:translateX(-50%); bottom:calc(16px + env(safe-area-inset-bottom, 0px));
+  width:min(560px, calc(100% - 32px)); z-index:5; display:none; align-items:center; flex-wrap:wrap; gap:4px;
+  background:var(--card); border:1px solid var(--line); border-radius:12px; padding:8px 8px 8px 14px;
+  box-shadow:0 8px 28px rgba(0,0,0,0.10);
+}
+body.selecting .selbar{display:flex;}
+body.selecting .wrap{padding-bottom:140px;}
+.selcount{font-size:0.86rem; font-weight:600; margin-right:auto;}
+.selbar button{background:none; color:var(--ink); font-size:0.84rem; font-weight:600; padding:8px 9px; border-radius:7px;}
+.selbar button:hover:not(:disabled){background:var(--accent-soft);}
+.selbar button:disabled{opacity:0.35; cursor:default;}
+.selbar .sel-danger{color:#B5533C;}
+.selbar .sel-dim{color:var(--ink-dim); font-weight:500;}
+.selbar .sel-done{background:var(--accent); color:var(--bg);}
+.selbar .sel-done:hover{background:var(--accent) !important; opacity:0.9;}
+@media (max-width:700px){
+  .selcount{width:100%; margin:0 0 2px 2px;}
+  .selbar{padding:10px 8px;}
+}
+
+.toast{
+  position:fixed; left:50%; transform:translateX(-50%) translateY(12px); bottom:calc(20px + env(safe-area-inset-bottom, 0px));
+  z-index:30; display:flex; align-items:center; gap:14px; max-width:calc(100% - 32px);
+  background:var(--ink); color:var(--bg); padding:10px 10px 10px 16px; border-radius:10px;
+  font-size:0.86rem; opacity:0; pointer-events:none; transition:opacity .18s ease, transform .18s ease;
+}
+.toast.show{opacity:1; transform:translateX(-50%) translateY(0); pointer-events:auto;}
+body.selecting .toast{bottom:calc(84px + env(safe-area-inset-bottom, 0px));}
+@media (max-width:700px){ body.selecting .toast{bottom:calc(120px + env(safe-area-inset-bottom, 0px));} }
+.toast span{overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+.toast button{background:none; color:var(--bg); font-weight:700; font-size:0.86rem; padding:4px 8px; border-radius:6px; text-decoration:underline; text-underline-offset:3px;}
 ::-webkit-scrollbar{width:0;height:0;}
 </style>
 </head>
@@ -195,17 +274,24 @@ button{font-family:inherit; cursor:pointer; border:none;}
   <p class="sub">A quiet nudge to revisit what you're studying.</p>
 
   <div class="addrow">
-    <input id="newTopic" type="text" placeholder="Add a topic — e.g. Photosynthesis" maxlength="120">
-    <input id="newCategory" type="text" placeholder="Course / unit" maxlength="80" list="catOptions" autocomplete="off" title="Use / to nest, e.g. Campbell Biology / Chapter 4">
+    <input id="newTopic" type="text" placeholder="Topic — e.g. Calvin Cycle" maxlength="120">
+    <div class="pathfield" id="addPath">
+      <button type="button" class="pf-chip" hidden></button>
+      <input class="pf-input" type="text" maxlength="80" autocomplete="off" aria-label="Course and chapter (optional)">
+      <div class="pf-menu" role="listbox"></div>
+    </div>
     <datalist id="catOptions"></datalist>
     <button onclick="addTopic()">Add</button>
   </div>
 
   <div class="sortrow">
     <span class="section-label" style="margin:0;">Sort</span>
-    <div class="segctrl">
-      <button class="seg active" id="segDue" onclick="setSort('due')">Due date</button>
-      <button class="seg" id="segCat" onclick="setSort('cat')">Category</button>
+    <div class="sort-right">
+      <button class="linkbtn" id="selectBtn" onclick="toggleSelect()">Select</button>
+      <div class="segctrl">
+        <button class="seg active" id="segDue" onclick="setSort('due')">Due date</button>
+        <button class="seg" id="segCat" onclick="setSort('cat')">Category</button>
+      </div>
     </div>
   </div>
 
@@ -238,7 +324,7 @@ button{font-family:inherit; cursor:pointer; border:none;}
 <div class="panel" id="editPanel">
   <div class="panel-card">
     <h2>Edit category</h2>
-    <p>Rename it, nest it with “/”, or type an existing name to merge.</p>
+    <p>Rename it, use “/” to put it under a course (e.g. Campbell Biology / Chapter 10), or type an existing name to merge.</p>
     <input class="field" id="editInput" type="text" maxlength="80" list="catOptions" autocomplete="off">
     <div class="edit-hint" id="editHint"></div>
     <div class="edit-actions">
@@ -248,6 +334,50 @@ button{font-family:inherit; cursor:pointer; border:none;}
       <button class="primarybtn" id="editSave" onclick="saveEdit()">Save</button>
     </div>
   </div>
+</div>
+
+<div class="panel" id="movePanel">
+  <div class="panel-card">
+    <h2 id="moveTitle">Move topics</h2>
+    <p>Pick a course and, optionally, a chapter. Leave it empty to remove their category.</p>
+    <div class="pathfield in-panel" id="movePath">
+      <button type="button" class="pf-chip" hidden></button>
+      <input class="pf-input" type="text" maxlength="80" autocomplete="off" aria-label="Course and chapter">
+      <div class="pf-menu" role="listbox"></div>
+    </div>
+    <div class="edit-hint" id="moveHint"></div>
+    <div class="edit-actions">
+      <span style="flex:1;"></span>
+      <button class="textbtn" onclick="closeMove()">Cancel</button>
+      <button class="primarybtn" onclick="doMove()">Move</button>
+    </div>
+  </div>
+</div>
+
+<div class="panel" id="confirmPanel">
+  <div class="panel-card">
+    <h2 id="confirmTitle"></h2>
+    <p id="confirmBody"></p>
+    <div class="edit-actions">
+      <span style="flex:1;"></span>
+      <button class="textbtn" onclick="closeConfirm()">Cancel</button>
+      <button class="dangerbtn" id="confirmOk" onclick="runConfirm()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<div class="selbar" id="selBar" role="toolbar" aria-label="Selection">
+  <span class="selcount" id="selCount">0 selected</span>
+  <button id="selAllBtn" onclick="toggleSelectAll()">Select all</button>
+  <button id="selMoveBtn" onclick="openMove()">Move</button>
+  <button id="selDeleteBtn" class="sel-danger" onclick="confirmDeleteSelected()">Delete</button>
+  <button id="clearAllBtn" class="sel-dim" onclick="confirmClearAll()">Clear all</button>
+  <button class="sel-done" onclick="toggleSelect(false)">Done</button>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite">
+  <span id="toastMsg"></span>
+  <button onclick="undoDelete()">Undo</button>
 </div>
 
 <script>
@@ -267,6 +397,13 @@ let showArchived = false;
 let sidebarQuery = '';
 let navPaths = [];
 let editingPath = null;
+let selecting = false;
+let selected = new Set();
+let lastDeleted = null;
+let toastTimer = null;
+let pendingConfirm = null;
+let addField = null;
+let moveField = null;
 
 function load(){
   try{
@@ -356,13 +493,22 @@ function canonicalCat(input, ignorePath){
   return parts.join(SEP);
 }
 
+function crumbs(path){ return path ? path.split(SEP).join(' › ') : ''; }
+
+function unarchiveFor(cat){
+  if(cat && isArchivedPath(cat)) meta.archived = meta.archived.filter(a => !within(cat, a));
+}
+
+function prefillPath(){
+  return activeCategory && activeCategory !== UNCAT ? activeCategory : '';
+}
+
 function addTopic(){
   const input = document.getElementById('newTopic');
-  const catInput = document.getElementById('newCategory');
   const name = input.value.trim();
   if(!name) return;
-  const cat = canonicalCat(catInput.value);
-  if(cat && isArchivedPath(cat)) meta.archived = meta.archived.filter(a => !within(cat, a));
+  const cat = canonicalCat(addField.getValue());
+  unarchiveFor(cat);
   const now = Date.now();
   topics.push({
     id: now+Math.random().toString(36).slice(2),
@@ -375,14 +521,176 @@ function addTopic(){
     created: now
   });
   input.value = '';
-  catInput.value = '';
+  addField.setValue(prefillPath());
   save(); saveMeta(); render();
   input.focus();
 }
 
 function deleteTopic(id){
-  topics = topics.filter(t=>t.id!==id);
+  const t = topics.find(x => x.id === id);
+  if(t) removeTopics([id], `Deleted “${t.name}”`);
+}
+
+// Deletes are applied immediately; the toast keeps enough state to put
+// everything back, including category metadata that saveMeta() prunes.
+function removeTopics(ids, message){
+  const idSet = new Set(ids);
+  const removed = topics.filter(t => idSet.has(t.id));
+  if(!removed.length) return;
+  lastDeleted = {
+    topics: removed,
+    archived: meta.archived.slice(),
+    expanded: meta.expanded.slice(),
+    active: activeCategory
+  };
+  topics = topics.filter(t => !idSet.has(t.id));
+  ids.forEach(id => selected.delete(id));
   save(); saveMeta(); render();
+  showToast(message);
+}
+
+function undoDelete(){
+  if(!lastDeleted) return;
+  const existing = new Set(topics.map(t => t.id));
+  topics.push(...lastDeleted.topics.filter(t => !existing.has(t.id)));
+  meta.archived = [...new Set([...meta.archived, ...lastDeleted.archived])];
+  meta.expanded = [...new Set([...meta.expanded, ...lastDeleted.expanded])];
+  const active = lastDeleted.active;
+  lastDeleted = null;
+  save(); saveMeta();
+  hideToast();
+  if(active !== activeCategory) setActiveCategory(active);
+  else render();
+}
+
+function showToast(message, undoable = true){
+  if(!undoable) lastDeleted = null;
+  document.querySelector('#toast button').style.display = undoable ? '' : 'none';
+  document.getElementById('toastMsg').textContent = message;
+  document.getElementById('toast').classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(hideToast, 6000);
+}
+function hideToast(){
+  clearTimeout(toastTimer);
+  document.getElementById('toast').classList.remove('show');
+}
+
+function plural(n, word){ return `${n} ${word}${n === 1 ? '' : 's'}`; }
+
+function toggleSelect(force){
+  selecting = typeof force === 'boolean' ? force : !selecting;
+  if(!selecting) selected.clear();
+  document.body.classList.toggle('selecting', selecting);
+  document.getElementById('selectBtn').textContent = selecting ? 'Done' : 'Select';
+  render();
+}
+
+function toggleSelected(id){
+  if(selected.has(id)) selected.delete(id); else selected.add(id);
+  render();
+  const row = document.querySelector(`.topic[data-id="${id}"]`);
+  if(row) row.focus({preventScroll: true});
+}
+
+function toggleSelectAll(){
+  const ids = visibleTopics().map(t => t.id);
+  const all = ids.length && ids.every(id => selected.has(id));
+  if(all) ids.forEach(id => selected.delete(id));
+  else ids.forEach(id => selected.add(id));
+  render();
+}
+
+function updateSelBar(){
+  const visible = visibleTopics();
+  const n = selected.size;
+  document.getElementById('selCount').textContent = n ? `${n} selected` : 'Tap topics to select';
+  document.getElementById('selMoveBtn').disabled = !n;
+  document.getElementById('selDeleteBtn').disabled = !n;
+  const allSelected = visible.length && visible.every(t => selected.has(t.id));
+  const allBtn = document.getElementById('selAllBtn');
+  allBtn.textContent = allSelected ? 'Select none' : 'Select all';
+  allBtn.disabled = !visible.length;
+  document.getElementById('clearAllBtn').disabled = !visible.length;
+}
+
+function openConfirm({title, body, confirmLabel, onConfirm}){
+  pendingConfirm = onConfirm;
+  document.getElementById('confirmTitle').textContent = title;
+  document.getElementById('confirmBody').textContent = body;
+  document.getElementById('confirmOk').textContent = confirmLabel;
+  document.getElementById('confirmPanel').classList.add('open');
+  document.getElementById('confirmOk').focus();
+}
+function closeConfirm(){
+  pendingConfirm = null;
+  document.getElementById('confirmPanel').classList.remove('open');
+}
+function runConfirm(){
+  const fn = pendingConfirm;
+  closeConfirm();
+  if(fn) fn();
+}
+
+function confirmDeleteSelected(){
+  const ids = [...selected];
+  if(!ids.length) return;
+  openConfirm({
+    title: `Delete ${plural(ids.length, 'topic')}?`,
+    body: `${ids.length === 1 ? 'Its' : 'Their'} review history will be deleted too.`,
+    confirmLabel: `Delete ${ids.length}`,
+    onConfirm: () => {
+      removeTopics(ids, `Deleted ${plural(ids.length, 'topic')}`);
+      toggleSelect(false);
+    }
+  });
+}
+
+function confirmClearAll(){
+  const scope = visibleTopics();
+  if(!scope.length) return;
+  const where = activeCategory === null ? '' : ` in ${crumbs(activeCategory)}`;
+  const archivedKept = activeCategory === null && topics.length > scope.length;
+  openConfirm({
+    title: activeCategory === null ? 'Clear all topics?' : `Clear all${where}?`,
+    body: `This deletes ${plural(scope.length, 'topic')}${where} and their review history.` +
+      (archivedKept ? ' Archived categories are kept.' : ''),
+    confirmLabel: `Delete all ${scope.length}`,
+    onConfirm: () => {
+      removeTopics(scope.map(t => t.id), `Cleared ${plural(scope.length, 'topic')}`);
+      toggleSelect(false);
+    }
+  });
+}
+
+function openMove(){
+  if(!selected.size) return;
+  document.getElementById('moveTitle').textContent = `Move ${plural(selected.size, 'topic')}`;
+  moveField.setValue(prefillPath());
+  updateMoveHint();
+  document.getElementById('movePanel').classList.add('open');
+  moveField.focus();
+}
+function closeMove(){
+  moveField.close();
+  document.getElementById('movePanel').classList.remove('open');
+}
+function updateMoveHint(){
+  const target = canonicalCat(moveField.getValue());
+  document.getElementById('moveHint').textContent = target
+    ? `Moves to ${crumbs(target)}.`
+    : 'They’ll become uncategorized.';
+}
+function doMove(){
+  const target = canonicalCat(moveField.getValue());
+  const n = selected.size;
+  unarchiveFor(target);
+  topics.forEach(t => { if(selected.has(t.id)) t.cat = target; });
+  if(target.includes(SEP) && !meta.expanded.includes(topOf(target))) meta.expanded.push(topOf(target));
+  save(); saveMeta();
+  closeMove();
+  toggleSelect(false);
+  showToast(`Moved ${plural(n, 'topic')} to ${target ? crumbs(target) : 'Uncategorized'}`, false);
 }
 
 function openPanel(id){
@@ -421,15 +729,24 @@ function grade(q){
 function catLabelFor(t){
   if(!t.cat) return '';
   if(activeCategory && activeCategory !== UNCAT && within(t.cat, activeCategory)){
-    return t.cat === activeCategory ? '' : t.cat.slice(activeCategory.length + SEP.length);
+    return t.cat === activeCategory ? '' : crumbs(t.cat.slice(activeCategory.length + SEP.length));
   }
-  return t.cat;
+  return crumbs(t.cat);
 }
 
 function rowHtml(t, isDue, showCat = true){
   const metaCore = isDue ? (t.reps===0 ? 'new' : `rep ${t.reps} · ease ${t.ease.toFixed(2)}`) : `due ${fmtDate(t.due)} · rep ${t.reps}`;
   const label = showCat ? catLabelFor(t) : '';
   const meta = metaCore + (label ? ` · ${escapeHtml(label)}` : '');
+  if(selecting){
+    const on = selected.has(t.id);
+    return `
+    <div class="topic selectable ${isDue?'due':''} ${on?'selected':''}" data-id="${t.id}" role="checkbox" aria-checked="${on}" tabindex="0"
+      onclick="toggleSelected('${t.id}')" onkeydown="if(event.key===' '||event.key==='Enter'){event.preventDefault();toggleSelected('${t.id}')}">
+      <div><div class="tname">${escapeHtml(t.name)}</div><div class="tmeta">${meta}</div></div>
+      <div class="topic-right"><span class="check ${on?'on':''}"></span></div>
+    </div>`;
+  }
   return `
     <div class="topic ${isDue?'due':''}">
       <div><div class="tname">${escapeHtml(t.name)}</div><div class="tmeta">${meta}</div></div>
@@ -495,6 +812,8 @@ const byDue = (a,b)=>a.due.localeCompare(b.due);
 
 function render(){
   if(activeCategory !== null && !topics.some(t => within(t.cat, activeCategory))) setActiveCategory(null, false);
+  const ids = new Set(topics.map(t => t.id));
+  selected.forEach(id => { if(!ids.has(id)) selected.delete(id); });
   const today = todayStr();
   const base = visibleTopics();
   const due = base.filter(t=>t.due <= today).sort(byDue);
@@ -528,6 +847,7 @@ function render(){
 
   renderSidebar();
   updateCatOptions();
+  if(selecting) updateSelBar();
 }
 
 function navItem(node, opts){
@@ -587,7 +907,7 @@ function renderSidebar(){
     html += `<button class="sidebar-more" onclick="toggleArchivedList()">${showArchived ? 'Hide archived' : `Archived · ${archivedPaths.length}`}</button>`;
     if(showArchived){
       archivedPaths.slice().sort((a,b)=>a.localeCompare(b)).forEach(a=>{
-        html += navItem({path: a, label: a, ...stats(topics.filter(t => within(t.cat, a)))}, {archived: true});
+        html += navItem({path: a, label: crumbs(a), ...stats(topics.filter(t => within(t.cat, a)))}, {archived: true});
       });
     }
   }
@@ -630,7 +950,9 @@ function toggleArchivedList(){
 }
 
 function setActiveCategory(cat, rerender = true){
+  if(cat !== activeCategory) selected.clear();
   activeCategory = cat;
+  if(addField) addField.setValue(prefillPath());
   try{
     if(cat) localStorage.setItem(CAT_KEY, cat); else localStorage.removeItem(CAT_KEY);
   }catch(e){}
@@ -686,11 +1008,11 @@ function updateEditHint(){
   const others = topics.filter(t => !within(t.cat, editingPath));
   const existing = others.filter(t => within(t.cat, target)).length;
   if(existing){
-    hint.textContent = `Merges into “${target}” — ${moving + existing} topics together.`;
+    hint.textContent = `Merges into ${crumbs(target)} — ${moving + existing} topics together.`;
     hint.classList.add('merge');
     btn.textContent = 'Merge';
   } else {
-    hint.textContent = `Renames ${moving} topic${moving===1?'':'s'} to “${target}”.`;
+    hint.textContent = `Renames ${plural(moving, 'topic')} to ${crumbs(target)}.`;
   }
 }
 
@@ -734,10 +1056,167 @@ function escapeHtml(s){
   return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
+// One input that builds "Course / Chapter": the course becomes a pill once
+// confirmed (Tab, "/", or picking a suggestion), then the same input takes
+// the chapter. getValue() returns the same path string the rest of the app uses.
+function createPathField(root, {onEnter, onChange}){
+  const chip = root.querySelector('.pf-chip');
+  const input = root.querySelector('.pf-input');
+  const menu = root.querySelector('.pf-menu');
+  let course = '';
+  let items = [];
+  let hl = -1;
+
+  function liveTopics(){ return topics.filter(t => !isArchivedPath(t.cat)); }
+  function courses(){
+    const counts = new Map();
+    liveTopics().forEach(t => { if(t.cat){ const c = topOf(t.cat); counts.set(c, (counts.get(c) || 0) + 1); } });
+    return [...counts].sort((a,b)=>a[0].localeCompare(b[0]));
+  }
+  function chapters(c){
+    const counts = new Map();
+    liveTopics().forEach(t => {
+      if(t.cat && t.cat.startsWith(c + SEP)){
+        const ch = t.cat.slice(c.length + SEP.length);
+        counts.set(ch, (counts.get(ch) || 0) + 1);
+      }
+    });
+    return [...counts].sort((a,b)=>a[0].localeCompare(b[0], undefined, {numeric: true}));
+  }
+
+  function paint(){
+    chip.hidden = !course;
+    chip.innerHTML = course ? `<span>${escapeHtml(course)}</span>›` : '';
+    chip.title = course ? 'Edit course' : '';
+    input.placeholder = course ? 'Chapter' : 'Course (optional)';
+  }
+
+  function commitCourse(text){
+    const name = splitPath(text).join(' ');
+    if(!name) return;
+    const match = courses().map(c => c[0]).find(c => c.toLowerCase() === name.toLowerCase());
+    course = match || name;
+    input.value = '';
+    paint();
+    refreshMenu();
+    changed();
+  }
+
+  function refreshMenu(){
+    if(document.activeElement !== input){ close(); return; }
+    const q = input.value.trim().toLowerCase();
+    const source = course ? chapters(course) : courses();
+    items = source
+      .filter(([name]) => !q || name.toLowerCase().includes(q))
+      .filter(([name]) => name.toLowerCase() !== q || !course)
+      .slice(0, 8)
+      .map(([name, n]) => ({kind: 'pick', name, n}));
+    if(!course && input.value.trim() && !items.length){
+      items.push({kind: 'nest', name: splitPath(input.value).join(' ')});
+    }
+    if(hl >= items.length) hl = -1;
+    if(!items.length){ close(); return; }
+    menu.innerHTML = items.map((it, i) => it.kind === 'nest'
+      ? `<div class="pf-opt pf-hint ${i===hl?'hl':''}" data-i="${i}" role="option">Add a chapter under “${escapeHtml(it.name)}” ›</div>`
+      : `<div class="pf-opt ${i===hl?'hl':''}" data-i="${i}" role="option">${escapeHtml(it.name)}<small>${plural(it.n, 'topic')}</small></div>`
+    ).join('');
+    menu.classList.add('open');
+  }
+
+  function close(){ menu.classList.remove('open'); hl = -1; }
+
+  function choose(i){
+    const it = items[i];
+    if(!it) return;
+    if(!course){ commitCourse(it.name); return; }
+    input.value = it.name;
+    close();
+    changed();
+  }
+
+  function uncourse(){
+    if(!course || input.value) return false;
+    input.value = course;
+    course = '';
+    paint();
+    refreshMenu();
+    changed();
+    return true;
+  }
+
+  function changed(){ if(onChange) onChange(); }
+
+  input.addEventListener('focus', refreshMenu);
+  input.addEventListener('blur', close);
+  input.addEventListener('input', ()=>{
+    if(input.value.includes('/')){
+      const parts = splitPath(input.value);
+      if(!course && parts.length){
+        commitCourse(parts[0]);
+        input.value = parts.slice(1).join(' ');
+      } else {
+        input.value = parts.join(' ');
+      }
+    }
+    hl = -1;
+    refreshMenu();
+    changed();
+  });
+  input.addEventListener('keydown', e=>{
+    const open = menu.classList.contains('open');
+    if(e.key === 'ArrowDown' && open){ e.preventDefault(); hl = (hl + 1) % items.length; refreshMenu(); }
+    else if(e.key === 'ArrowUp' && open){ e.preventDefault(); hl = hl <= 0 ? items.length - 1 : hl - 1; refreshMenu(); }
+    else if(e.key === 'Enter'){
+      e.preventDefault();
+      if(open && hl >= 0) choose(hl);
+      else { close(); onEnter(); }
+    }
+    else if(e.key === 'Tab' && !e.shiftKey){
+      if(open && hl >= 0){ e.preventDefault(); choose(hl); }
+      else if(!course && input.value.trim()){ e.preventDefault(); commitCourse(input.value); }
+    }
+    else if(e.key === 'Backspace' && input.selectionStart === 0 && input.selectionEnd === 0){
+      if(uncourse()) e.preventDefault();
+    }
+    else if(e.key === 'Escape' && open){ e.stopPropagation(); close(); }
+  });
+  menu.addEventListener('mousedown', e=>{
+    const opt = e.target.closest('.pf-opt');
+    if(!opt) return;
+    e.preventDefault();
+    choose(Number(opt.dataset.i));
+  });
+  chip.addEventListener('mousedown', e=>{
+    e.preventDefault();
+    input.focus();
+    uncourse();
+  });
+  root.addEventListener('mousedown', e=>{
+    if(e.target === root){ e.preventDefault(); input.focus(); }
+  });
+
+  paint();
+  return {
+    getValue(){
+      const rest = splitPath(input.value).join(SEP);
+      return course ? (rest ? course + SEP + rest : course) : rest;
+    },
+    setValue(path){
+      const parts = splitPath(path);
+      course = parts.length ? parts[0] : '';
+      input.value = parts.slice(1).join(SEP);
+      paint();
+      close();
+    },
+    focus(){ input.focus(); },
+    close
+  };
+}
+
+addField = createPathField(document.getElementById('addPath'), {onEnter: addTopic});
+moveField = createPathField(document.getElementById('movePath'), {onEnter: doMove, onChange: updateMoveHint});
+
 document.getElementById('newTopic').addEventListener('keydown', e=>{
-  if(e.key==='Enter') addTopic();
-});
-document.getElementById('newCategory').addEventListener('keydown', e=>{
   if(e.key==='Enter') addTopic();
 });
 document.getElementById('editInput').addEventListener('input', updateEditHint);
@@ -748,18 +1227,20 @@ document.getElementById('catSearch').addEventListener('input', e=>{
   sidebarQuery = e.target.value;
   renderSidebar();
 });
+const panelClosers = {panel: closePanel, editPanel: closeEdit, movePanel: closeMove, confirmPanel: closeConfirm};
 document.querySelectorAll('.panel').forEach(p=>p.addEventListener('click', e=>{
-  if(e.target !== p) return;
-  if(p.id === 'editPanel') closeEdit(); else closePanel();
+  if(e.target === p) panelClosers[p.id]();
 }));
 document.addEventListener('keydown', e=>{
   if(e.key !== 'Escape') return;
-  closeEdit();
-  closePanel();
+  const open = document.querySelector('.panel.open');
+  if(open) panelClosers[open.id]();
+  else if(selecting) toggleSelect(false);
 });
 
 load();
 saveMeta();
+addField.setValue(prefillPath());
 setSort(sortMode);
 </script>
 </body>
