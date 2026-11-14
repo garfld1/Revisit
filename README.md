@@ -16,6 +16,10 @@ The whole app lives in `index.html` (no framework, no build step required); Vite
 
 A small amber dot next to a category means it has topics due today.
 
+## Editing topics
+
+Click (or tap) a topic's name to rename it in place. Enter or clicking away saves; Escape cancels. To change a topic's course or chapter, use *Select → Move*.
+
 ## Selecting and clearing
 
 - **Select** (next to the sort control) turns rows into checkboxes and shows a bar with *Select all*, *Move*, *Delete*, *Clear all*, and *Done*. Escape also exits.
