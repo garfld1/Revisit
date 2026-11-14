@@ -39,23 +39,67 @@ body{
   -webkit-font-smoothing:antialiased;
 }
 .layout{display:flex; align-items:flex-start; gap:28px; max-width:820px; margin:0 auto; padding:0 20px;}
-.sidebar{width:168px; flex-shrink:0; position:sticky; top:40px; padding-top:40px;}
-.sidebar-title{font-size:0.78rem; color:var(--ink-dim); font-weight:600; margin:0 0 10px;}
+.sidebar{width:176px; flex-shrink:0; position:sticky; top:40px; padding-top:40px;}
+.sidebar-head{display:flex; align-items:baseline; justify-content:space-between; margin:0 0 10px;}
+.sidebar-title{font-size:0.78rem; color:var(--ink-dim); font-weight:600; margin:0;}
+.sidebar-order{background:none; color:var(--ink-dim); font-size:0.74rem; padding:2px 4px; border-radius:5px; opacity:0.75;}
+.sidebar-order:hover{opacity:1; color:var(--accent);}
+.sidebar-search{
+  width:100%; padding:7px 10px; margin:0 0 8px; border:1px solid var(--line); border-radius:8px;
+  background:var(--card); color:var(--ink); font-size:0.84rem; font-family:inherit;
+}
+.sidebar-search:focus{outline:2px solid var(--accent); outline-offset:1px;}
 .sidebar-item{
-  display:flex; align-items:center; justify-content:space-between; gap:8px;
-  padding:8px 10px; border-radius:8px; font-size:0.88rem; color:var(--ink-dim);
-  cursor:pointer; margin-bottom:2px;
+  display:flex; align-items:center; gap:4px;
+  padding:7px 8px 7px 4px; border-radius:8px; font-size:0.88rem; color:var(--ink-dim);
+  cursor:pointer; margin-bottom:2px; min-height:34px;
 }
 .sidebar-item:hover{background:var(--accent-soft);}
 .sidebar-item.active{background:var(--accent-soft); color:var(--accent); font-weight:600;}
-.sidebar-count{font-size:0.76rem; color:var(--ink-dim); opacity:0.8;}
+.sidebar-item.child{padding-left:22px; font-size:0.84rem;}
+.sidebar-item.archived{opacity:0.7;}
+.caret, .caret-spacer{width:16px; height:16px; flex-shrink:0;}
+.caret{
+  background:none; color:var(--ink-dim); padding:0; border-radius:4px;
+  display:inline-flex; align-items:center; justify-content:center; font-size:0.55rem;
+  transition:transform .15s ease;
+}
+.caret:hover{color:var(--accent);}
+.caret.open{transform:rotate(90deg);}
+.si-label{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+.si-right{display:flex; align-items:center; gap:6px; flex-shrink:0;}
+.due-dot{width:6px; height:6px; border-radius:50%; background:var(--due); flex-shrink:0;}
+.sidebar-count{font-size:0.76rem; color:var(--ink-dim); opacity:0.8; font-weight:400; min-width:12px; text-align:right;}
+.editbtn{
+  display:none; background:none; color:var(--ink-dim); padding:0 2px; border-radius:4px;
+  font-size:0.8rem; line-height:1; height:18px; align-items:center;
+}
+.editbtn:hover{color:var(--accent);}
+.sidebar-item:hover .editbtn{display:inline-flex;}
+.sidebar-item:hover .sidebar-count{display:none;}
+@media (hover:none){
+  .sidebar-item:hover .sidebar-count{display:inline;}
+  .sidebar-item.active .editbtn{display:inline-flex;}
+  .sidebar-item.active .sidebar-count{display:none;}
+}
+.sidebar-more{
+  display:block; background:none; color:var(--ink-dim); font-size:0.78rem; padding:8px 4px 4px 24px;
+  opacity:0.75; text-align:left;
+}
+.sidebar-more:hover{opacity:1; color:var(--accent);}
 .wrap{max-width:560px; flex:1; min-width:0; padding:40px 0 80px;}
 @media (max-width:700px){
   .layout{flex-direction:column; gap:0; padding:0 20px;}
   .sidebar{width:100%; position:static; padding-top:28px; padding-bottom:4px;}
-  .sidebar-list{display:flex; gap:6px; overflow-x:auto; padding-bottom:4px;}
-  .sidebar-item{margin-bottom:0; white-space:nowrap; flex-shrink:0;}
+  .sidebar-list{display:flex; gap:6px; overflow-x:auto; padding-bottom:4px; align-items:center;}
+  .sidebar-item{margin-bottom:0; white-space:nowrap; flex-shrink:0; padding:7px 10px 7px 6px;}
+  .sidebar-item.child{padding-left:10px; border:1px dashed var(--line);}
+  .sidebar-item .caret-spacer{display:none;}
+  .sidebar-item.child .si-label, .sidebar-item .si-label{overflow:visible;}
   .sidebar-count{display:none;}
+  .sidebar-item:hover .sidebar-count{display:none;}
+  .sidebar-item.active .editbtn{display:inline-flex;}
+  .sidebar-more{flex-shrink:0; white-space:nowrap; padding:7px 8px;}
   .wrap{padding-top:16px;}
 }
 h1{
@@ -77,13 +121,14 @@ button{font-family:inherit; cursor:pointer; border:none;}
 .addrow button:active{opacity:0.85;}
 .addrow{flex-wrap:wrap;}
 .addrow input#newTopic{flex:2 1 200px;}
-.addrow input#newCategory{flex:1 1 130px;}
+.addrow input#newCategory{flex:1 1 150px;}
 .sortrow{display:flex; align-items:center; justify-content:space-between; margin:0 0 16px;}
 .segctrl{display:flex; gap:3px; background:var(--accent-soft); padding:3px; border-radius:8px;}
 .seg{padding:6px 11px; border-radius:6px; font-size:0.8rem; font-weight:600; color:var(--ink-dim); background:transparent;}
 .seg.active{background:var(--card); color:var(--ink);}
 .group-head{font-size:0.78rem; color:var(--ink-dim); font-weight:600; margin:22px 0 10px;}
 .group-head:first-child{margin-top:0;}
+.subgroup-head{font-size:0.76rem; color:var(--ink-dim); margin:14px 0 8px; padding-left:10px; border-left:2px solid var(--line);}
 .section-label{font-size:0.78rem; text-transform:none; color:var(--ink-dim); margin:0 0 10px; font-weight:600;}
 .topic{
   display:flex; align-items:center; justify-content:space-between; gap:10px;
@@ -120,13 +165,29 @@ button{font-family:inherit; cursor:pointer; border:none;}
 .g-good{color:var(--accent) !important;}
 .g-easy{color:var(--accent) !important; background:var(--accent-soft) !important;}
 .panel-close{display:block; margin:16px auto 0; background:none; color:var(--ink-dim); font-size:0.85rem;}
+.field{
+  width:100%; padding:11px 13px; border:1px solid var(--line); border-radius:9px;
+  background:var(--bg); color:var(--ink); font-size:0.95rem; font-family:inherit;
+}
+.field:focus{outline:2px solid var(--accent); outline-offset:1px;}
+.edit-hint{font-size:0.8rem; color:var(--ink-dim); min-height:1.2em; margin:8px 2px 18px;}
+.edit-hint.merge{color:var(--due);}
+.edit-actions{display:flex; align-items:center; gap:8px;}
+.textbtn{background:none; color:var(--ink-dim); font-size:0.86rem; padding:9px 10px; border-radius:8px;}
+.textbtn:hover{color:var(--ink); background:var(--accent-soft);}
+.primarybtn{background:var(--accent); color:var(--bg); border-radius:9px; padding:9px 18px; font-size:0.88rem; font-weight:600;}
+.primarybtn:disabled{opacity:0.45; cursor:default;}
 ::-webkit-scrollbar{width:0;height:0;}
 </style>
 </head>
 <body>
 <div class="layout">
 <aside class="sidebar">
-  <p class="sidebar-title">Categories</p>
+  <div class="sidebar-head">
+    <p class="sidebar-title">Categories</p>
+    <button class="sidebar-order" id="orderBtn" onclick="toggleOrder()" title="Change category order">Recent</button>
+  </div>
+  <input class="sidebar-search" id="catSearch" type="search" placeholder="Filter categories" autocomplete="off" style="display:none;">
   <div class="sidebar-list" id="sidebarList"></div>
 </aside>
 <div class="wrap">
@@ -135,7 +196,7 @@ button{font-family:inherit; cursor:pointer; border:none;}
 
   <div class="addrow">
     <input id="newTopic" type="text" placeholder="Add a topic — e.g. Photosynthesis" maxlength="120">
-    <input id="newCategory" type="text" placeholder="Category (optional)" maxlength="60" list="catOptions" autocomplete="off">
+    <input id="newCategory" type="text" placeholder="Course / unit" maxlength="80" list="catOptions" autocomplete="off" title="Use / to nest, e.g. Campbell Biology / Chapter 4">
     <datalist id="catOptions"></datalist>
     <button onclick="addTopic()">Add</button>
   </div>
@@ -174,20 +235,48 @@ button{font-family:inherit; cursor:pointer; border:none;}
   </div>
 </div>
 
+<div class="panel" id="editPanel">
+  <div class="panel-card">
+    <h2>Edit category</h2>
+    <p>Rename it, nest it with “/”, or type an existing name to merge.</p>
+    <input class="field" id="editInput" type="text" maxlength="80" list="catOptions" autocomplete="off">
+    <div class="edit-hint" id="editHint"></div>
+    <div class="edit-actions">
+      <button class="textbtn" id="archiveBtn" onclick="toggleArchiveEditing()">Archive</button>
+      <span style="flex:1;"></span>
+      <button class="textbtn" onclick="closeEdit()">Cancel</button>
+      <button class="primarybtn" id="editSave" onclick="saveEdit()">Save</button>
+    </div>
+  </div>
+</div>
+
 <script>
 const STORE_KEY = 'recall_topics_v1';
 const SORT_KEY = 'recall_sort_v1';
 const CAT_KEY = 'recall_activecat_v1';
+const META_KEY = 'recall_catmeta_v1';
+const UNCAT = 'Uncategorized';
+const SEP = ' / ';
+const SEARCH_THRESHOLD = 10;
 let topics = [];
 let reviewingId = null;
 let sortMode = 'due';
 let activeCategory = null;
+let meta = {archived: [], expanded: [], order: 'recent'};
+let showArchived = false;
+let sidebarQuery = '';
+let navPaths = [];
+let editingPath = null;
 
 function load(){
   try{
     const raw = localStorage.getItem(STORE_KEY);
     topics = raw ? JSON.parse(raw) : [];
   }catch(e){ topics = []; }
+  topics.forEach(t=>{
+    t.cat = normPath(t.cat);
+    if(!t.created) t.created = parseInt(t.id, 10) || Date.now();
+  });
   try{
     const s = localStorage.getItem(SORT_KEY);
     if(s === 'due' || s === 'cat') sortMode = s;
@@ -195,6 +284,12 @@ function load(){
   try{
     const c = localStorage.getItem(CAT_KEY);
     activeCategory = c ? c : null;
+  }catch(e){}
+  try{
+    const m = JSON.parse(localStorage.getItem(META_KEY) || '{}');
+    if(Array.isArray(m.archived)) meta.archived = m.archived.map(normPath).filter(Boolean);
+    if(Array.isArray(m.expanded)) meta.expanded = m.expanded.map(normPath).filter(Boolean);
+    if(m.order === 'recent' || m.order === 'alpha') meta.order = m.order;
   }catch(e){}
 }
 
@@ -210,6 +305,11 @@ function setSort(mode){
 function save(){
   try{ localStorage.setItem(STORE_KEY, JSON.stringify(topics)); }catch(e){}
 }
+function saveMeta(){
+  meta.archived = meta.archived.filter(a => topics.some(t => within(t.cat, a)));
+  meta.expanded = meta.expanded.filter(p => topics.some(t => within(t.cat, p)));
+  try{ localStorage.setItem(META_KEY, JSON.stringify(meta)); }catch(e){}
+}
 function todayStr(){ return new Date().toISOString().slice(0,10); }
 function addDays(dateStr, n){
   const d = new Date(dateStr+'T00:00:00');
@@ -221,28 +321,68 @@ function fmtDate(dateStr){
   return d.toLocaleDateString(undefined,{month:'short',day:'numeric'});
 }
 
+// Category paths are "Parent / Child". Segments never contain "/", so a
+// prefix of `path + SEP` reliably means "nested under path".
+function splitPath(s){
+  return String(s || '').split('/').map(x=>x.trim().replace(/\s+/g,' ')).filter(Boolean);
+}
+function normPath(s){ return splitPath(s).join(SEP); }
+function topOf(path){ const i = path.indexOf(SEP); return i < 0 ? path : path.slice(0, i); }
+function within(cat, path){
+  if(path === UNCAT) return !cat;
+  return !!cat && (cat === path || cat.startsWith(path + SEP));
+}
+function isArchivedPath(path){
+  return !!path && path !== UNCAT && meta.archived.some(a => within(path, a));
+}
+function nodePaths(list){
+  const set = new Set();
+  list.forEach(t=>{ if(t.cat){ set.add(t.cat); set.add(topOf(t.cat)); } });
+  return [...set];
+}
+
+// Snaps typed input onto existing casing ("apush / unit 2" -> "APUSH / Unit 2")
+// so near-duplicate categories don't drift apart.
+function canonicalCat(input, ignorePath){
+  const parts = splitPath(input);
+  if(!parts.length) return '';
+  const pool = ignorePath ? topics.filter(t => !within(t.cat, ignorePath)) : topics;
+  const existing = nodePaths(pool);
+  const full = parts.join(SEP);
+  const hit = existing.find(p => p.toLowerCase() === full.toLowerCase());
+  if(hit) return hit;
+  const topHit = existing.map(topOf).find(p => p.toLowerCase() === parts[0].toLowerCase());
+  if(topHit) parts[0] = topHit;
+  return parts.join(SEP);
+}
+
 function addTopic(){
   const input = document.getElementById('newTopic');
   const catInput = document.getElementById('newCategory');
   const name = input.value.trim();
   if(!name) return;
+  const cat = canonicalCat(catInput.value);
+  if(cat && isArchivedPath(cat)) meta.archived = meta.archived.filter(a => !within(cat, a));
+  const now = Date.now();
   topics.push({
-    id: Date.now()+Math.random().toString(36).slice(2),
+    id: now+Math.random().toString(36).slice(2),
     name,
-    cat: catInput.value.trim(),
+    cat,
     ease: 2.5,
     interval: 0,
     reps: 0,
-    due: todayStr()
+    due: todayStr(),
+    created: now
   });
   input.value = '';
   catInput.value = '';
-  save(); render();
+  save(); saveMeta(); render();
+  input.focus();
 }
 
 function deleteTopic(id){
   topics = topics.filter(t=>t.id!==id);
-  save(); render();
+  save(); saveMeta(); render();
 }
 
 function openPanel(id){
@@ -272,14 +412,24 @@ function grade(q){
     if(t.ease < 1.3) t.ease = 1.3;
   }
   t.due = addDays(todayStr(), t.interval);
+  t.last = Date.now();
   save();
   closePanel();
   render();
 }
 
-function rowHtml(t, isDue){
+function catLabelFor(t){
+  if(!t.cat) return '';
+  if(activeCategory && activeCategory !== UNCAT && within(t.cat, activeCategory)){
+    return t.cat === activeCategory ? '' : t.cat.slice(activeCategory.length + SEP.length);
+  }
+  return t.cat;
+}
+
+function rowHtml(t, isDue, showCat = true){
   const metaCore = isDue ? (t.reps===0 ? 'new' : `rep ${t.reps} · ease ${t.ease.toFixed(2)}`) : `due ${fmtDate(t.due)} · rep ${t.reps}`;
-  const meta = metaCore + (t.cat && t.cat.trim() ? ` · ${escapeHtml(t.cat.trim())}` : '');
+  const label = showCat ? catLabelFor(t) : '';
+  const meta = metaCore + (label ? ` · ${escapeHtml(label)}` : '');
   return `
     <div class="topic ${isDue?'due':''}">
       <div><div class="tname">${escapeHtml(t.name)}</div><div class="tmeta">${meta}</div></div>
@@ -290,11 +440,65 @@ function rowHtml(t, isDue){
     </div>`;
 }
 
-function render(){
+function stats(list){
   const today = todayStr();
-  const base = activeCategory ? topics.filter(t => (t.cat && t.cat.trim() ? t.cat.trim() : 'Uncategorized') === activeCategory) : topics;
-  const due = base.filter(t=>t.due <= today).sort((a,b)=>a.due.localeCompare(b.due));
-  const upcoming = base.filter(t=>t.due > today).sort((a,b)=>a.due.localeCompare(b.due));
+  let due = 0, last = 0;
+  list.forEach(t=>{
+    if(t.due <= today) due++;
+    last = Math.max(last, t.last || 0, t.created || 0);
+  });
+  return {count: list.length, due, last};
+}
+
+function sortNodes(nodes){
+  return nodes.sort((a,b)=>{
+    if(meta.order === 'recent'){
+      if((a.due > 0) !== (b.due > 0)) return a.due > 0 ? -1 : 1;
+      if(a.last !== b.last) return b.last - a.last;
+    }
+    return a.label.localeCompare(b.label);
+  });
+}
+
+function buildTree(list){
+  const groups = new Map();
+  const uncat = [];
+  list.forEach(t=>{
+    if(!t.cat){ uncat.push(t); return; }
+    const top = topOf(t.cat);
+    if(!groups.has(top)) groups.set(top, {all: [], direct: [], kids: new Map()});
+    const g = groups.get(top);
+    g.all.push(t);
+    if(t.cat === top) g.direct.push(t);
+    else {
+      if(!g.kids.has(t.cat)) g.kids.set(t.cat, []);
+      g.kids.get(t.cat).push(t);
+    }
+  });
+  const nodes = sortNodes([...groups].map(([top, g])=>({
+    path: top, label: top, topics: g.all, direct: g.direct, ...stats(g.all),
+    children: sortNodes([...g.kids].map(([p, ts])=>({
+      path: p, label: p.slice(top.length + SEP.length), topics: ts, direct: ts, ...stats(ts), children: []
+    })))
+  })));
+  if(uncat.length) nodes.push({path: UNCAT, label: UNCAT, topics: uncat, direct: uncat, ...stats(uncat), children: []});
+  return nodes;
+}
+
+function visibleTopics(){
+  if(activeCategory === null) return topics.filter(t => !isArchivedPath(t.cat));
+  const showArchivedToo = isArchivedPath(activeCategory);
+  return topics.filter(t => within(t.cat, activeCategory) && (showArchivedToo || !isArchivedPath(t.cat)));
+}
+
+const byDue = (a,b)=>a.due.localeCompare(b.due);
+
+function render(){
+  if(activeCategory !== null && !topics.some(t => within(t.cat, activeCategory))) setActiveCategory(null, false);
+  const today = todayStr();
+  const base = visibleTopics();
+  const due = base.filter(t=>t.due <= today).sort(byDue);
+  const upcoming = base.filter(t=>t.due > today).sort(byDue);
 
   document.getElementById('dueLabel').textContent = due.length ? `Due today · ${due.length}` : 'Due today';
 
@@ -305,23 +509,19 @@ function render(){
   upEl.innerHTML = upcoming.length ? upcoming.map(t=>rowHtml(t, false)).join('') : `<div class="empty">No upcoming topics${activeCategory ? ' in this category' : ''}.</div>`;
 
   if(sortMode === 'cat'){
-    const groups = {};
-    base.forEach(t=>{
-      const key = t.cat && t.cat.trim() ? t.cat.trim() : 'Uncategorized';
-      (groups[key] = groups[key] || []).push(t);
-    });
-    const keys = Object.keys(groups).sort((a,b)=>{
-      if(a==='Uncategorized') return 1;
-      if(b==='Uncategorized') return -1;
-      return a.localeCompare(b);
-    });
     const catEl = document.getElementById('catView');
-    if(!keys.length){
+    const tree = buildTree(base);
+    if(!tree.length){
       catEl.innerHTML = `<div class="empty">No topics yet. Add one above.</div>`;
     } else {
-      catEl.innerHTML = keys.map(key=>{
-        const items = groups[key].sort((a,b)=>a.due.localeCompare(b.due));
-        return `<div class="group-head">${escapeHtml(key)}</div>` + items.map(t=>rowHtml(t, t.due<=today)).join('');
+      catEl.innerHTML = tree.map(n=>{
+        let html = `<div class="group-head">${escapeHtml(n.label)}</div>`;
+        html += n.direct.slice().sort(byDue).map(t=>rowHtml(t, t.due<=today, false)).join('');
+        html += n.children.map(c=>
+          `<div class="subgroup-head">${escapeHtml(c.label)}</div>` +
+          c.topics.slice().sort(byDue).map(t=>rowHtml(t, t.due<=today, false)).join('')
+        ).join('');
+        return html;
       }).join('');
     }
   }
@@ -330,46 +530,236 @@ function render(){
   updateCatOptions();
 }
 
-function renderSidebar(){
-  const counts = {};
-  topics.forEach(t=>{
-    const key = t.cat && t.cat.trim() ? t.cat.trim() : 'Uncategorized';
-    counts[key] = (counts[key]||0)+1;
-  });
-  const keys = Object.keys(counts).sort((a,b)=>{
-    if(a==='Uncategorized') return 1;
-    if(b==='Uncategorized') return -1;
-    return a.localeCompare(b);
-  });
-  const el = document.getElementById('sidebarList');
-  let html = `<div class="sidebar-item ${activeCategory===null?'active':''}" onclick="setActiveCategory(null)"><span>All</span><span class="sidebar-count">${topics.length}</span></div>`;
-  html += keys.map(k=>`<div class="sidebar-item ${activeCategory===k?'active':''}" onclick="setActiveCategory('${k.replace(/'/g,"\\'")}')"><span>${escapeHtml(k)}</span><span class="sidebar-count">${counts[k]}</span></div>`).join('');
-  el.innerHTML = html;
+function navItem(node, opts){
+  const i = navPaths.push(node.path) - 1;
+  const isActive = activeCategory === node.path;
+  const editable = node.path !== null && node.path !== UNCAT;
+  const classes = ['sidebar-item'];
+  if(isActive) classes.push('active');
+  if(opts.child) classes.push('child');
+  if(opts.archived) classes.push('archived');
+  let lead = '';
+  if(!opts.child){
+    lead = opts.hasKids
+      ? `<button class="caret ${opts.expanded?'open':''}" onclick="event.stopPropagation(); toggleNode(${i})" aria-label="${opts.expanded?'Collapse':'Expand'} ${escapeHtml(node.label)}" aria-expanded="${opts.expanded}">▶</button>`
+      : `<span class="caret-spacer"></span>`;
+  }
+  const tip = `${node.count} topic${node.count===1?'':'s'}${node.due ? ` · ${node.due} due` : ''}`;
+  return `<div class="${classes.join(' ')}" onclick="selectNode(${i})" title="${escapeHtml(node.label)} — ${tip}">
+    ${lead}<span class="si-label">${escapeHtml(node.label)}</span>
+    <span class="si-right">
+      ${node.due && node.path !== null ? `<span class="due-dot" aria-label="${node.due} due"></span>` : ''}
+      <span class="sidebar-count">${node.count}</span>
+      ${editable ? `<button class="editbtn" onclick="event.stopPropagation(); openEdit(${i})" aria-label="Edit ${escapeHtml(node.label)}">✎</button>` : ''}
+    </span>
+  </div>`;
 }
 
-function setActiveCategory(cat){
+function renderSidebar(){
+  const live = topics.filter(t => !isArchivedPath(t.cat));
+  const tree = buildTree(live);
+  const q = sidebarQuery.trim().toLowerCase();
+  const nodeCount = tree.reduce((n, x)=>n + 1 + x.children.length, 0);
+  const search = document.getElementById('catSearch');
+  search.style.display = (nodeCount >= SEARCH_THRESHOLD || q) ? '' : 'none';
+  document.getElementById('orderBtn').textContent = meta.order === 'recent' ? 'Recent' : 'A–Z';
+
+  navPaths = [];
+  let html = navItem({path: null, label: 'All', ...stats(live)}, {});
+  let shown = 0;
+  tree.forEach(n=>{
+    const selfMatch = !q || n.label.toLowerCase().includes(q);
+    const kidMatches = q ? n.children.filter(c => c.label.toLowerCase().includes(q)) : [];
+    if(q && !selfMatch && !kidMatches.length) return;
+    shown++;
+    const hasKids = n.children.length > 0;
+    const expanded = kidMatches.length ? true : meta.expanded.includes(n.path);
+    html += navItem(n, {hasKids, expanded});
+    if(expanded){
+      const kids = kidMatches.length ? kidMatches : n.children;
+      html += kids.map(c => navItem(c, {child: true})).join('');
+    }
+  });
+  if(q && !shown) html += `<div class="empty" style="padding:8px 4px;">No matching categories.</div>`;
+
+  const archivedPaths = meta.archived.filter(a => topics.some(t => within(t.cat, a)));
+  if(archivedPaths.length && !q){
+    html += `<button class="sidebar-more" onclick="toggleArchivedList()">${showArchived ? 'Hide archived' : `Archived · ${archivedPaths.length}`}</button>`;
+    if(showArchived){
+      archivedPaths.slice().sort((a,b)=>a.localeCompare(b)).forEach(a=>{
+        html += navItem({path: a, label: a, ...stats(topics.filter(t => within(t.cat, a)))}, {archived: true});
+      });
+    }
+  }
+  const list = document.getElementById('sidebarList');
+  list.innerHTML = html;
+  const active = list.querySelector('.sidebar-item.active');
+  if(active && list.scrollWidth > list.clientWidth){
+    const left = active.offsetLeft - list.offsetLeft;
+    if(left < list.scrollLeft || left + active.offsetWidth > list.scrollLeft + list.clientWidth){
+      list.scrollLeft = left - 20;
+    }
+  }
+}
+
+function selectNode(i){
+  const path = navPaths[i];
+  if(path && path !== UNCAT && path.includes(SEP)){
+    const top = topOf(path);
+    if(!meta.expanded.includes(top)){ meta.expanded.push(top); saveMeta(); }
+  }
+  setActiveCategory(path);
+}
+
+function toggleNode(i){
+  const path = navPaths[i];
+  meta.expanded = meta.expanded.includes(path) ? meta.expanded.filter(p => p !== path) : [...meta.expanded, path];
+  saveMeta();
+  renderSidebar();
+}
+
+function toggleOrder(){
+  meta.order = meta.order === 'recent' ? 'alpha' : 'recent';
+  saveMeta();
+  render();
+}
+
+function toggleArchivedList(){
+  showArchived = !showArchived;
+  renderSidebar();
+}
+
+function setActiveCategory(cat, rerender = true){
   activeCategory = cat;
   try{
     if(cat) localStorage.setItem(CAT_KEY, cat); else localStorage.removeItem(CAT_KEY);
   }catch(e){}
-  render();
+  if(rerender) render();
 }
 
 function updateCatOptions(){
-  const cats = [...new Set(topics.map(t=>t.cat).filter(c=>c && c.trim()))].sort((a,b)=>a.localeCompare(b));
-  const dl = document.getElementById('catOptions');
-  dl.innerHTML = cats.map(c=>`<option value="${escapeHtml(c)}"></option>`).join('');
+  const live = topics.filter(t => !isArchivedPath(t.cat));
+  const paths = nodePaths(live);
+  const tops = [...new Set(paths.map(topOf))];
+  const opts = [...new Set([...paths, ...tops.map(p => p + SEP)])].sort((a,b)=>a.localeCompare(b));
+  document.getElementById('catOptions').innerHTML = opts.map(c=>`<option value="${escapeHtml(c)}"></option>`).join('');
+}
+
+function openEdit(i){
+  editingPath = navPaths[i];
+  if(!editingPath || editingPath === UNCAT) return;
+  const input = document.getElementById('editInput');
+  input.value = editingPath;
+  document.getElementById('archiveBtn').textContent = meta.archived.includes(editingPath) ? 'Unarchive' : 'Archive';
+  updateEditHint();
+  document.getElementById('editPanel').classList.add('open');
+  input.focus();
+  input.select();
+}
+function closeEdit(){
+  editingPath = null;
+  document.getElementById('editPanel').classList.remove('open');
+}
+
+function editTarget(){
+  return canonicalCat(document.getElementById('editInput').value, editingPath);
+}
+
+function updateEditHint(){
+  if(!editingPath) return;
+  const target = editTarget();
+  const hint = document.getElementById('editHint');
+  const btn = document.getElementById('editSave');
+  const moving = topics.filter(t => within(t.cat, editingPath)).length;
+  hint.classList.remove('merge');
+  btn.disabled = false;
+  btn.textContent = 'Save';
+  if(!target){
+    hint.textContent = 'Name can’t be empty.';
+    btn.disabled = true;
+    return;
+  }
+  if(target === editingPath){
+    hint.textContent = `${moving} topic${moving===1?'':'s'} in this category.`;
+    return;
+  }
+  const others = topics.filter(t => !within(t.cat, editingPath));
+  const existing = others.filter(t => within(t.cat, target)).length;
+  if(existing){
+    hint.textContent = `Merges into “${target}” — ${moving + existing} topics together.`;
+    hint.classList.add('merge');
+    btn.textContent = 'Merge';
+  } else {
+    hint.textContent = `Renames ${moving} topic${moving===1?'':'s'} to “${target}”.`;
+  }
+}
+
+function renamePath(from, to){
+  const re = p => p === from ? to : (p && p.startsWith(from + SEP) ? to + p.slice(from.length) : p);
+  topics.forEach(t=>{ if(within(t.cat, from)) t.cat = normPath(re(t.cat)); });
+  meta.archived = [...new Set(meta.archived.map(re))];
+  meta.expanded = [...new Set(meta.expanded.map(re))];
+  if(to.includes(SEP) && !meta.expanded.includes(topOf(to))) meta.expanded.push(topOf(to));
+  if(activeCategory && activeCategory !== UNCAT) activeCategory = re(activeCategory);
+}
+
+function saveEdit(){
+  if(!editingPath) return;
+  const target = editTarget();
+  if(!target) return;
+  if(target !== editingPath){
+    renamePath(editingPath, target);
+    setActiveCategory(activeCategory, false);
+    save(); saveMeta();
+  }
+  closeEdit();
+  render();
+}
+
+function toggleArchiveEditing(){
+  const path = editingPath;
+  if(!path) return;
+  if(meta.archived.includes(path)){
+    meta.archived = meta.archived.filter(a => a !== path);
+  } else {
+    meta.archived = [...meta.archived.filter(a => !within(a, path)), path];
+    if(activeCategory && within(activeCategory, path)) setActiveCategory(null, false);
+  }
+  saveMeta();
+  closeEdit();
+  render();
 }
 
 function escapeHtml(s){
-  return s.replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
 document.getElementById('newTopic').addEventListener('keydown', e=>{
   if(e.key==='Enter') addTopic();
 });
+document.getElementById('newCategory').addEventListener('keydown', e=>{
+  if(e.key==='Enter') addTopic();
+});
+document.getElementById('editInput').addEventListener('input', updateEditHint);
+document.getElementById('editInput').addEventListener('keydown', e=>{
+  if(e.key==='Enter') saveEdit();
+});
+document.getElementById('catSearch').addEventListener('input', e=>{
+  sidebarQuery = e.target.value;
+  renderSidebar();
+});
+document.querySelectorAll('.panel').forEach(p=>p.addEventListener('click', e=>{
+  if(e.target !== p) return;
+  if(p.id === 'editPanel') closeEdit(); else closePanel();
+}));
+document.addEventListener('keydown', e=>{
+  if(e.key !== 'Escape') return;
+  closeEdit();
+  closePanel();
+});
 
 load();
+saveMeta();
 setSort(sortMode);
 </script>
 </body>
