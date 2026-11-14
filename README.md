@@ -16,6 +16,10 @@ The whole app lives in `index.html` (no framework, no build step required); Vite
 
 A small amber dot next to a category means it has topics due today.
 
+## Keeping the list calm
+
+Topics are flat rows separated by thin dividers, not boxed cards. A small amber dot marks what's due, and per-row actions (Do today, ×) appear on hover. *Upcoming* is collapsed by default (click it to expand), and long lists show 40 rows at a time with a "Show more" button.
+
 ## Editing topics
 
 Click (or tap) a topic's name to rename it in place. Enter or clicking away saves; Escape cancels.

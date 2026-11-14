@@ -134,10 +134,21 @@ button{font-family:inherit; cursor:pointer; border:none;}
 .section-label{font-size:0.78rem; text-transform:none; color:var(--ink-dim); margin:0 0 10px; font-weight:600;}
 .topic{
   display:flex; align-items:center; justify-content:space-between; gap:10px;
-  padding:13px 14px; border:1px solid var(--line); border-radius:10px; background:var(--card);
-  margin-bottom:9px;
+  padding:9px 8px; border:none; border-bottom:1px solid var(--line); border-radius:6px; background:none;
+  margin:0;
 }
-.topic.due{border-color:var(--due); background:var(--due-soft);}
+.topic:hover{background:var(--accent-soft);}
+.topic.due .tname::before{
+  content:""; display:inline-block; width:6px; height:6px; border-radius:50%;
+  background:var(--due); margin-right:8px; vertical-align:middle; position:relative; top:-1px;
+}
+.more-btn, .fold-btn{
+  background:none; color:var(--ink-dim); font-size:0.82rem; padding:10px 8px; opacity:0.85; text-align:left;
+}
+.more-btn:hover, .fold-btn:hover{color:var(--accent); opacity:1;}
+.fold-btn{display:flex; align-items:center; gap:6px; padding:0; margin:24px 0 10px; font-size:0.78rem; font-weight:600;}
+.fold-btn .fold-caret{display:inline-block; font-size:0.55rem; transition:transform .15s ease;}
+.fold-btn.open .fold-caret{transform:rotate(90deg);}
 .tname{font-family:var(--font-serif); font-size:0.98rem; font-weight:500;}
 .tbody{flex:1; min-width:0;}
 .tname.editable{cursor:text; border-radius:4px; overflow-wrap:anywhere;}
@@ -167,7 +178,9 @@ button{font-family:inherit; cursor:pointer; border:none;}
 .todaybtn:hover{color:var(--accent); background:var(--accent-soft);}
 .topic:hover .todaybtn, .todaybtn:focus-visible{opacity:1;}
 @media (hover:none){ .todaybtn{opacity:0.75;} }
-.delbtn{background:none; color:var(--ink-dim); font-size:1.1rem; padding:4px 6px; border-radius:6px; line-height:1;}
+.delbtn{background:none; color:var(--ink-dim); font-size:1.1rem; padding:4px 6px; border-radius:6px; line-height:1; opacity:0; transition:opacity .15s ease;}
+.topic:hover .delbtn, .delbtn:focus-visible{opacity:1;}
+@media (hover:none){ .delbtn{opacity:0.5;} }
 .delbtn:hover{color:var(--due);}
 .empty{color:var(--ink-dim); font-size:0.9rem; padding:18px 0 28px; font-style:italic;}
 .panel{
@@ -360,7 +373,7 @@ body.selecting .toast{bottom:calc(84px + env(safe-area-inset-bottom, 0px));}
     <p class="section-label" id="dueLabel">Due today</p>
     <div id="dueList"></div>
 
-    <p class="section-label" style="margin-top:24px;">Upcoming</p>
+    <button class="fold-btn" id="upToggle" onclick="toggleUpcoming()" aria-expanded="false"><span class="fold-caret">▶</span><span id="upLabel">Upcoming</span></button>
     <div id="upcomingList"></div>
   </div>
 
@@ -1037,6 +1050,18 @@ function calendarHtml(list){
       : `<div class="empty">${day < today ? 'Past days are empty — anything overdue shows on today.' : 'Nothing scheduled for this day.'}</div>`}`;
 }
 
+var PAGE = 40;
+var upcomingOpen = false;
+var shown = {due: PAGE, up: PAGE};
+function limitedRows(list, isDue, key){
+  const n = shown[key];
+  let html = list.slice(0, n).map(t=>rowHtml(t, isDue)).join('');
+  if(list.length > n) html += `<button class="more-btn" onclick="showMore('${key}')">Show ${Math.min(PAGE, list.length-n)} more · ${list.length-n} hidden</button>`;
+  return html;
+}
+function showMore(key){ shown[key] += PAGE; render(); }
+function toggleUpcoming(){ upcomingOpen = !upcomingOpen; render(); }
+
 function render(){
   if(activeCategory !== null && !topics.some(t => within(t.cat, activeCategory))) setActiveCategory(null, false);
   const ids = new Set(topics.map(t => t.id));
@@ -1055,8 +1080,13 @@ function render(){
   dueEl.innerHTML = upEl.innerHTML = catEl.innerHTML = calEl.innerHTML = '';
 
   if(sortMode === 'due'){
-    dueEl.innerHTML = due.length ? due.map(t=>rowHtml(t, true)).join('') : `<div class="empty">${activeCategory ? 'Nothing due in this category.' : 'Nothing due — nice work. Add a topic above.'}</div>`;
-    upEl.innerHTML = upcoming.length ? upcoming.map(t=>rowHtml(t, false)).join('') : `<div class="empty">No upcoming topics${activeCategory ? ' in this category' : ''}.</div>`;
+    dueEl.innerHTML = due.length ? limitedRows(due, true, 'due') : `<div class="empty">${activeCategory ? 'Nothing due in this category.' : 'Nothing due — nice work. Add a topic above.'}</div>`;
+    const open = upcomingOpen || selecting;
+    document.getElementById('upLabel').textContent = upcoming.length ? `Upcoming · ${upcoming.length}` : 'Upcoming';
+    const tg = document.getElementById('upToggle');
+    tg.classList.toggle('open', open);
+    tg.setAttribute('aria-expanded', open);
+    upEl.innerHTML = !open ? '' : upcoming.length ? limitedRows(upcoming, false, 'up') : `<div class="empty">No upcoming topics${activeCategory ? ' in this category' : ''}.</div>`;
   }
 
   if(sortMode === 'cal') calEl.innerHTML = calendarHtml(base);
@@ -1183,7 +1213,7 @@ function toggleArchivedList(){
 }
 
 function setActiveCategory(cat, rerender = true){
-  if(cat !== activeCategory) selected.clear();
+  if(cat !== activeCategory){ selected.clear(); shown.due = shown.up = PAGE; }
   activeCategory = cat;
   if(addField) addField.setValue(prefillPath());
   try{
