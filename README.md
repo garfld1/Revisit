@@ -34,6 +34,35 @@ Hover an upcoming topic (or look for the faint button on mobile) and click **Do 
 
 Switch the view to **Calendar** to see a month grid of what's due. Each day shows how many topics are scheduled, with busier days tinted a little more strongly; overdue topics are counted on today so nothing hides in the past. Click a day to list its topics below the grid (review, rename, and move all work there). The calendar follows the sidebar, so selecting a course or chapter shows just its schedule. It's read-only — the schedule itself comes from your grades.
 
+## Exam dates
+
+Open a course's ✎ dialog and set an **Exam date**. Nothing else to configure: a course with a date is in exam mode, a course without one uses plain SM-2 for long-term retention. You can mix both.
+
+- **Reviews land before the exam.** Normally SM-2 might push a well-known topic 30 days out. With a date set, the next review is capped so it comes up before the exam (the last pass about two days out). The stored interval and ease are untouched, so scheduling picks up normally once the date has passed.
+- **Existing schedules are pulled in.** Setting a date moves any review already scheduled past the cap, with an **Undo** message. Clearing the date doesn't move them back.
+- **Quick glimpse.** A line above the list shows each upcoming exam in view, e.g. `USABO · exam in 12 days · 18 not yet reviewed · 5 shaky`. Click it to jump to that course. Exams are marked ★ on the calendar.
+- **Coming back after a break.** If you haven't reviewed in a week or more and topics are waiting, a gentle note says so. Because everything was already scheduled, you resume where you left off instead of starting over.
+
+## Weakest topics
+
+The **Weakest** view lists what needs the most work, worst first: topics whose last grade was a miss, whose ease has slipped, or that you've missed more than once. Rows show how often a topic was missed. The sidebar tooltip for a course or chapter also counts its shaky topics.
+
+## Linking your notes
+
+Paste a link (`https://…` or an Obsidian `obsidian://` URI) into the topic box, or into a topic's name when renaming it, and it's attached to the topic as a ↗ icon that opens your notes in Notion, Google Drive, Obsidian, and so on. Revisit stays the index and schedule; the notes stay where they are. Delete the link from the name to remove it.
+
+## Importing what you already have
+
+**Import** (next to *Select*) turns an outline or a markdown export into topics in one go, from pasted text or chosen `.md` / `.txt` files:
+
+- `# Heading` is a course, `## Heading` is a chapter.
+- Bullets, numbered lines, and deeper headings become topics.
+- `[text](url)`, bare URLs, and Obsidian `[[wiki links]]` are handled; links are attached to the topic.
+- The path box at the top is the default home for anything not under a heading.
+- A preview line shows how many topics will be added and how many already exist (duplicates are skipped). **Undo** removes the import.
+
+Notion, Obsidian, and Google Docs can all export markdown, so there are no integrations or sign-ins.
+
 ## Selecting and clearing
 
 - **Select** (next to the sort control) turns rows into checkboxes and shows a bar with *Select all*, *Move*, *Delete*, *Clear all*, and *Done*. Escape also exits.

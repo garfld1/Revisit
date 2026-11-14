@@ -329,6 +329,29 @@ body.selecting .toast{bottom:calc(84px + env(safe-area-inset-bottom, 0px));}
   .cal-count{display:none;}
   .cal-dot{display:block; position:absolute; bottom:5px; left:50%; width:5px; height:5px; margin-left:-2.5px; border-radius:50%; background:var(--due);}
 }
+.sort-right{flex-wrap:wrap; justify-content:flex-end;}
+.strip{margin:-14px 0 22px; display:flex; flex-direction:column; gap:4px;}
+.strip:empty{display:none;}
+.strip-line{
+  background:none; padding:0; text-align:left; font-size:0.84rem; color:var(--ink-dim); font-family:inherit;
+}
+button.strip-line:hover{color:var(--accent);}
+.strip-line b{color:var(--ink); font-weight:600;}
+.strip-line.nudge{color:var(--due);}
+.topic-right .noteicon{
+  color:var(--ink-dim); text-decoration:none; font-size:0.95rem; padding:4px 6px; border-radius:6px; line-height:1;
+}
+.topic-right .noteicon:hover{color:var(--accent); background:var(--accent-soft);}
+.exam-row{display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin:0 0 6px;}
+.exam-row[hidden]{display:none;}
+.exam-row label{font-size:0.84rem; font-weight:600; color:var(--ink-dim);}
+.exam-row .field{width:auto; flex:1 1 150px; padding:8px 10px; font-size:0.9rem;}
+.exam-note{flex-basis:100%; font-size:0.78rem; color:var(--ink-dim); margin:0;}
+.field.area{min-height:150px; resize:vertical; font-family:var(--font-mono); font-size:0.82rem; line-height:1.5;}
+.import-tools{display:flex; align-items:center; gap:8px; margin:0 0 8px;}
+.import-tools .edit-hint{margin:0; flex:1;}
+.cal-exam{position:absolute; top:3px; right:5px; font-size:0.66rem; color:var(--accent); line-height:1;}
+@media (max-width:700px){ .cal-exam{top:2px; right:3px;} }
 ::-webkit-scrollbar{width:0;height:0;}
 </style>
 </head>
@@ -347,7 +370,7 @@ body.selecting .toast{bottom:calc(84px + env(safe-area-inset-bottom, 0px));}
   <p class="sub">A quiet nudge to revisit what you're studying.</p>
 
   <div class="addrow">
-    <input id="newTopic" type="text" placeholder="Topic — e.g. Calvin Cycle" maxlength="120">
+    <input id="newTopic" type="text" placeholder="Topic — paste a link to attach your notes" maxlength="400">
     <div class="pathfield" id="addPath">
       <button type="button" class="pf-chip" hidden></button>
       <input class="pf-input" type="text" maxlength="80" autocomplete="off" aria-label="Course and chapter (optional)">
@@ -357,14 +380,18 @@ body.selecting .toast{bottom:calc(84px + env(safe-area-inset-bottom, 0px));}
     <button onclick="addTopic()">Add</button>
   </div>
 
+  <div class="strip" id="strip" aria-live="polite"></div>
+
   <div class="sortrow">
     <span class="section-label view-label" style="margin:0;">View</span>
     <div class="sort-right">
+      <button class="linkbtn" onclick="openImport()">Import</button>
       <button class="linkbtn" id="selectBtn" onclick="toggleSelect()">Select</button>
       <div class="segctrl">
         <button class="seg active" id="segDue" onclick="setSort('due')">Due date</button>
         <button class="seg" id="segCat" onclick="setSort('cat')">Category</button>
         <button class="seg" id="segCal" onclick="setSort('cal')">Calendar</button>
+        <button class="seg" id="segFocus" onclick="setSort('focus')">Weakest</button>
       </div>
     </div>
   </div>
@@ -402,6 +429,12 @@ body.selecting .toast{bottom:calc(84px + env(safe-area-inset-bottom, 0px));}
     <p>Rename it, use “/” to put it under a course (e.g. Campbell Biology / Chapter 10), or type an existing name to merge.</p>
     <input class="field" id="editInput" type="text" maxlength="80" list="catOptions" autocomplete="off">
     <div class="edit-hint" id="editHint"></div>
+    <div class="exam-row" id="examRow" hidden>
+      <label for="examInput">Exam date</label>
+      <input class="field" type="date" id="examInput">
+      <button class="textbtn" type="button" onclick="document.getElementById('examInput').value=''">Clear</button>
+      <p class="exam-note">With a date set, reviews are scheduled so every topic comes up before it.</p>
+    </div>
     <div class="edit-actions">
       <button class="textbtn" id="archiveBtn" onclick="toggleArchiveEditing()">Archive</button>
       <span style="flex:1;"></span>
@@ -425,6 +458,29 @@ body.selecting .toast{bottom:calc(84px + env(safe-area-inset-bottom, 0px));}
       <span style="flex:1;"></span>
       <button class="textbtn" onclick="closeMove()">Cancel</button>
       <button class="primarybtn" onclick="doMove()">Move</button>
+    </div>
+  </div>
+</div>
+
+<div class="panel" id="importPanel">
+  <div class="panel-card">
+    <h2>Import topics</h2>
+    <p>Paste an outline or a markdown export (Notion, Obsidian, Docs). <code>#</code> is a course, <code>##</code> a chapter, and bullets or lower headings become topics. Links and <code>[[wiki links]]</code> are kept.</p>
+    <div class="pathfield in-panel" id="importPath" style="margin-bottom:8px;">
+      <button type="button" class="pf-chip" hidden></button>
+      <input class="pf-input" type="text" maxlength="80" autocomplete="off" aria-label="Default course and chapter">
+      <div class="pf-menu" role="listbox"></div>
+    </div>
+    <textarea class="field area" id="importText" spellcheck="false" placeholder="# Campbell Biology&#10;## Chapter 10&#10;- Calvin cycle&#10;- Light reactions"></textarea>
+    <div class="import-tools" style="margin-top:8px;">
+      <button class="textbtn" type="button" onclick="document.getElementById('importFile').click()">Choose files…</button>
+      <input type="file" id="importFile" accept=".md,.markdown,.txt,.csv,text/*" multiple hidden>
+      <div class="edit-hint" id="importHint"></div>
+    </div>
+    <div class="edit-actions">
+      <span style="flex:1;"></span>
+      <button class="textbtn" onclick="closeImport()">Cancel</button>
+      <button class="primarybtn" id="importGo" onclick="doImport()">Import</button>
     </div>
   </div>
 </div>
@@ -467,7 +523,7 @@ let topics = [];
 let reviewingId = null;
 let sortMode = 'due';
 let activeCategory = null;
-let meta = {archived: [], expanded: [], order: 'recent'};
+let meta = {archived: [], expanded: [], order: 'recent', exams: {}};
 let showArchived = false;
 let sidebarQuery = '';
 let navPaths = [];
@@ -492,7 +548,7 @@ function load(){
   });
   try{
     const s = localStorage.getItem(SORT_KEY);
-    if(s === 'due' || s === 'cat' || s === 'cal') sortMode = s;
+    if(s === 'due' || s === 'cat' || s === 'cal' || s === 'focus') sortMode = s;
   }catch(e){}
   try{
     const c = localStorage.getItem(CAT_KEY);
@@ -503,6 +559,12 @@ function load(){
     if(Array.isArray(m.archived)) meta.archived = m.archived.map(normPath).filter(Boolean);
     if(Array.isArray(m.expanded)) meta.expanded = m.expanded.map(normPath).filter(Boolean);
     if(m.order === 'recent' || m.order === 'alpha') meta.order = m.order;
+    if(m.exams && typeof m.exams === 'object'){
+      Object.entries(m.exams).forEach(([c, d]) => {
+        const key = normPath(c);
+        if(key && !key.includes(SEP) && DATE_RE.test(d)) meta.exams[key] = d;
+      });
+    }
   }catch(e){}
 }
 
@@ -511,8 +573,9 @@ function setSort(mode){
   try{ localStorage.setItem(SORT_KEY, mode); }catch(e){}
   document.getElementById('segDue').classList.toggle('active', mode==='due');
   document.getElementById('segCat').classList.toggle('active', mode==='cat');
+  document.getElementById('segFocus').classList.toggle('active', mode==='focus');
   document.getElementById('dueView').style.display = mode==='due' ? '' : 'none';
-  document.getElementById('catView').style.display = mode==='cat' ? '' : 'none';
+  document.getElementById('catView').style.display = (mode==='cat' || mode==='focus') ? '' : 'none';
   document.getElementById('segCal').classList.toggle('active', mode==='cal');
   document.getElementById('calView').style.display = mode==='cal' ? '' : 'none';
   render();
@@ -523,6 +586,9 @@ function save(){
 function saveMeta(){
   meta.archived = meta.archived.filter(a => topics.some(t => within(t.cat, a)));
   meta.expanded = meta.expanded.filter(p => topics.some(t => within(t.cat, p)));
+  Object.keys(meta.exams).forEach(c => {
+    if(!topics.some(t => t.cat && topOf(t.cat) === c)) delete meta.exams[c];
+  });
   try{ localStorage.setItem(META_KEY, JSON.stringify(meta)); }catch(e){}
 }
 function isoLocal(d){
@@ -534,6 +600,68 @@ function addDays(dateStr, n){
   d.setDate(d.getDate()+n);
   return isoLocal(d);
 }
+const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+function daysBetween(a, b){
+  return Math.round((new Date(b+'T00:00:00') - new Date(a+'T00:00:00')) / 864e5);
+}
+
+// Exam-aware scheduling. A course with a future exam date gets a ceiling on
+// how far out its reviews can land, so every topic comes up at least once
+// (the last pass ~2 days before). Courses without a date use plain SM-2.
+function examCapDays(t){
+  const course = t.cat ? topOf(t.cat) : '';
+  const exam = course && meta.exams[course];
+  if(!exam) return Infinity;
+  const days = daysBetween(todayStr(), exam);
+  return days > 0 ? Math.max(1, days - 2) : Infinity;
+}
+// Pulls already-scheduled reviews in a course back to the ceiling. Returns the
+// previous dates so the caller can offer an undo.
+function applyExamCap(course){
+  const today = todayStr();
+  const moved = [];
+  topics.forEach(t => {
+    if(!t.cat || topOf(t.cat) !== course) return;
+    const cap = examCapDays(t);
+    if(cap === Infinity) return;
+    const latest = addDays(today, cap);
+    if(t.due > latest){ moved.push({id: t.id, due: t.due}); t.due = latest; }
+  });
+  return moved;
+}
+
+// Weak = reviewed at least once and currently shaky: last grade was a miss,
+// ease has slipped, or it has been missed more than once.
+function isWeak(t){
+  return !!t.last && (t.reps === 0 || t.ease < 2.4 || (t.lapses || 0) >= 2);
+}
+function weakScore(t){
+  return (t.lapses || 0) * 0.5 + (2.5 - t.ease) + (t.reps === 0 ? 1 : 0);
+}
+function weakTopics(list){
+  return list.filter(isWeak).sort((a, b) => weakScore(b) - weakScore(a) || byDue(a, b));
+}
+
+// Notes live elsewhere (Notion, Drive, Obsidian…); a topic can just point to them.
+const LINK_RE = /(?:https?|obsidian):\/\/[^\s<>)\]]+/i;
+function cleanLink(s){ return String(s || '').replace(/[.,;:!?]+$/, ''); }
+function safeLink(s){ return /^(?:https?|obsidian):\/\//i.test(s || '') ? s : ''; }
+function fallbackName(link){
+  try{
+    const u = new URL(link);
+    const file = u.searchParams.get('file');
+    if(file) return decodeURIComponent(file).split('/').pop();
+    return u.hostname || link;
+  }catch(e){ return link; }
+}
+function splitLink(text){
+  const m = String(text).match(LINK_RE);
+  if(!m) return {name: String(text).replace(/\s+/g, ' ').trim(), link: ''};
+  const link = cleanLink(m[0]);
+  const name = String(text).replace(m[0], ' ').replace(/\s+/g, ' ').trim();
+  return {name, link};
+}
+
 function fmtDate(dateStr){
   const d = new Date(dateStr+'T00:00:00');
   return d.toLocaleDateString(undefined,{month:'short',day:'numeric'});
@@ -584,14 +712,9 @@ function prefillPath(){
   return activeCategory && activeCategory !== UNCAT ? activeCategory : '';
 }
 
-function addTopic(){
-  const input = document.getElementById('newTopic');
-  const name = input.value.trim();
-  if(!name) return;
-  const cat = canonicalCat(addField.getValue());
-  unarchiveFor(cat);
+function pushTopic(name, cat, link){
   const now = Date.now();
-  topics.push({
+  const t = {
     id: now+Math.random().toString(36).slice(2),
     name,
     cat,
@@ -600,7 +723,20 @@ function addTopic(){
     reps: 0,
     due: todayStr(),
     created: now
-  });
+  };
+  if(safeLink(link)) t.link = link;
+  topics.push(t);
+  return t;
+}
+
+function addTopic(){
+  const input = document.getElementById('newTopic');
+  const parsed = splitLink(input.value);
+  const name = (parsed.name || (parsed.link ? fallbackName(parsed.link) : '')).slice(0, 120);
+  if(!name) return;
+  const cat = canonicalCat(addField.getValue());
+  unarchiveFor(cat);
+  pushTopic(name, cat, parsed.link);
   input.value = '';
   addField.setValue(prefillPath());
   save(); saveMeta(); render();
@@ -621,6 +757,7 @@ function removeTopics(ids, message){
   const snapshot = {
     archived: meta.archived.slice(),
     expanded: meta.expanded.slice(),
+    exams: {...meta.exams},
     active: activeCategory
   };
   topics = topics.filter(t => !idSet.has(t.id));
@@ -631,6 +768,7 @@ function removeTopics(ids, message){
     topics.push(...removed.filter(t => !existing.has(t.id)));
     meta.archived = [...new Set([...meta.archived, ...snapshot.archived])];
     meta.expanded = [...new Set([...meta.expanded, ...snapshot.expanded])];
+    meta.exams = {...snapshot.exams, ...meta.exams};
     save(); saveMeta();
     if(snapshot.active !== activeCategory) setActiveCategory(snapshot.active);
     else render();
@@ -691,7 +829,9 @@ function toggleSelected(id){
 }
 
 function shownTopics(){
-  return sortMode === 'cal' ? calDayTopics(visibleTopics()) : visibleTopics();
+  if(sortMode === 'cal') return calDayTopics(visibleTopics());
+  if(sortMode === 'focus') return weakTopics(visibleTopics());
+  return visibleTopics();
 }
 
 function toggleSelectAll(){
@@ -812,8 +952,8 @@ function startRename(id, el){
   if(!t || el.querySelector('input')) return;
   const input = document.createElement('input');
   input.className = 'tname-input';
-  input.maxLength = 120;
-  input.value = t.name;
+  input.maxLength = 400;
+  input.value = t.name + (t.link ? ' ' + t.link : '');
   input.setAttribute('aria-label', 'Topic name');
   el.textContent = '';
   el.appendChild(input);
@@ -823,8 +963,15 @@ function startRename(id, el){
   const finish = commit => {
     if(done) return;
     done = true;
-    const name = input.value.trim();
-    if(commit !== false && name && name !== t.name){ t.name = name; save(); }
+    if(commit !== false){
+      const parsed = splitLink(input.value);
+      const name = (parsed.name || (parsed.link ? fallbackName(parsed.link) : '')).slice(0, 120);
+      if(name && (name !== t.name || parsed.link !== (t.link || ''))){
+        t.name = name;
+        if(parsed.link) t.link = parsed.link; else delete t.link;
+        save();
+      }
+    }
     render();
     const row = document.querySelector(`.tname.editable[onclick*="'${id}'"]`);
     if(row && commit !== null) row.focus({preventScroll: true});
@@ -856,6 +1003,7 @@ function grade(q){
   if(q < 3){
     t.reps = 0;
     t.interval = 1;
+    t.lapses = (t.lapses || 0) + 1;
   } else {
     t.reps += 1;
     if(t.reps === 1) t.interval = 1;
@@ -864,7 +1012,9 @@ function grade(q){
     t.ease = t.ease + (0.1 - (5-q)*(0.08+(5-q)*0.02));
     if(t.ease < 1.3) t.ease = 1.3;
   }
-  t.due = addDays(todayStr(), t.interval);
+  // t.interval stays the pure SM-2 value; only the due date is capped by an
+  // exam, so scheduling and ease pick up normally once the exam has passed.
+  t.due = addDays(todayStr(), Math.min(t.interval, examCapDays(t)));
   t.last = Date.now();
   save();
   closePanel();
@@ -886,8 +1036,18 @@ function crumbButton(t, label){
   return ` <button class="crumb ghost" ${open}>· ${ghost}</button>`;
 }
 
-function rowHtml(t, isDue, showCat = true){
-  const metaCore = isDue ? (t.reps===0 ? 'new' : `rep ${t.reps} · ease ${t.ease.toFixed(2)}`) : `due ${fmtDate(t.due)} · rep ${t.reps}`;
+function weakMeta(t, isDue){
+  const parts = [];
+  if(t.lapses) parts.push(`missed ${t.lapses}×`);
+  parts.push(`ease ${t.ease.toFixed(2)}`);
+  parts.push(isDue ? 'due now' : `due ${fmtDate(t.due)}`);
+  return parts.join(' · ');
+}
+
+function rowHtml(t, isDue, showCat = true, metaOverride = ''){
+  const metaCore = metaOverride || (isDue ? (t.reps===0 ? 'new' : `rep ${t.reps} · ease ${t.ease.toFixed(2)}`) : `due ${fmtDate(t.due)} · rep ${t.reps}`);
+  const href = safeLink(t.link);
+  const noteLink = href ? `<a class="noteicon" href="${escapeHtml(href)}" target="_blank" rel="noopener noreferrer" title="Open notes" aria-label="Open notes for ${escapeHtml(t.name)}">↗</a>` : '';
   const label = showCat ? catLabelFor(t) : '';
   const meta = metaCore + (label ? ` · ${escapeHtml(label)}` : '');
   if(selecting){
@@ -903,6 +1063,7 @@ function rowHtml(t, isDue, showCat = true){
     <div class="topic ${isDue?'due':''}">
       <div class="tbody"><div class="tname editable" tabindex="0" title="Click to rename" onclick="startRename('${t.id}', this)" onkeydown="if(event.key==='Enter'){event.preventDefault();startRename('${t.id}', this)}">${escapeHtml(t.name)}</div><div class="tmeta">${escapeHtml(metaCore)}${crumbButton(t, label)}</div></div>
       <div class="topic-right">
+        ${noteLink}
         ${isDue
           ? `<button class="reviewbtn" onclick="openPanel('${t.id}')">Review</button>`
           : `<button class="todaybtn" onclick="doToday('${t.id}')" title="Move this review to today">Do today</button>`}
@@ -913,12 +1074,13 @@ function rowHtml(t, isDue, showCat = true){
 
 function stats(list){
   const today = todayStr();
-  let due = 0, last = 0;
+  let due = 0, last = 0, weak = 0;
   list.forEach(t=>{
     if(t.due <= today) due++;
+    if(isWeak(t)) weak++;
     last = Math.max(last, t.last || 0, t.created || 0);
   });
-  return {count: list.length, due, last};
+  return {count: list.length, due, last, weak};
 }
 
 function sortNodes(nodes){
@@ -1001,6 +1163,8 @@ function calendarHtml(list){
   const day = calDay || today;
   const counts = new Map();
   list.forEach(t => { const d = calDateOf(t, today); counts.set(d, (counts.get(d) || 0) + 1); });
+  const examOn = new Map();
+  examsInScope(list).forEach(([c, d]) => examOn.set(d, [...(examOn.get(d) || []), c]));
 
   const first = new Date(calMonth + 'T00:00:00');
   const gridStart = new Date(first);
@@ -1026,8 +1190,10 @@ function calendarHtml(list){
     if(iso === day) cls.push('sel');
     if(level) cls.push('l' + level);
     const label = d.toLocaleDateString(undefined, {weekday: 'long', month: 'long', day: 'numeric'}) + (n ? `, ${plural(n, 'topic')}` : '');
-    cells += `<button class="${cls.join(' ')}" onclick="calPick('${iso}')" aria-label="${escapeHtml(label)}" aria-pressed="${iso === day}">
-      <span class="cal-num">${d.getDate()}</span>${n ? `<span class="cal-count">${n}</span><span class="cal-dot"></span>` : ''}
+    const exams = examOn.get(iso);
+    const examTip = exams ? `Exam: ${exams.join(', ')}` : '';
+    cells += `<button class="${cls.join(' ')}" onclick="calPick('${iso}')" aria-label="${escapeHtml(label + (examTip ? ', ' + examTip : ''))}" aria-pressed="${iso === day}"${examTip ? ` title="${escapeHtml(examTip)}"` : ''}>
+      <span class="cal-num">${d.getDate()}</span>${exams ? '<span class="cal-exam" aria-hidden="true">★</span>' : ''}${n ? `<span class="cal-count">${n}</span><span class="cal-dot"></span>` : ''}
     </button>`;
   }
 
@@ -1052,7 +1218,7 @@ function calendarHtml(list){
 
 var PAGE = 40;
 var upcomingOpen = false;
-var shown = {due: PAGE, up: PAGE};
+var shown = {due: PAGE, up: PAGE, weak: PAGE};
 function limitedRows(list, isDue, key){
   const n = shown[key];
   let html = list.slice(0, n).map(t=>rowHtml(t, isDue)).join('');
@@ -1091,6 +1257,15 @@ function render(){
 
   if(sortMode === 'cal') calEl.innerHTML = calendarHtml(base);
 
+  if(sortMode === 'focus'){
+    const weak = weakTopics(base);
+    catEl.innerHTML = weak.length
+      ? `<p class="section-label">Needs work · ${weak.length}</p>` +
+        weak.slice(0, shown.weak).map(t => rowHtml(t, t.due <= today, true, weakMeta(t, t.due <= today))).join('') +
+        (weak.length > shown.weak ? `<button class="more-btn" onclick="showMore('weak')">Show ${Math.min(PAGE, weak.length - shown.weak)} more · ${weak.length - shown.weak} hidden</button>` : '')
+      : `<div class="empty">Nothing flagged yet. Topics you grade Blanked or Shaky will show up here, weakest first.</div>`;
+  }
+
   if(sortMode === 'cat'){
     const tree = buildTree(base);
     if(!tree.length){
@@ -1108,9 +1283,46 @@ function render(){
     }
   }
 
+  renderStrip(base);
   renderSidebar();
   updateCatOptions();
   if(selecting) updateSelBar();
+}
+
+// Courses in the current view that have an exam date.
+function examsInScope(base){
+  const courses = new Set(base.filter(t => t.cat).map(t => topOf(t.cat)));
+  return Object.entries(meta.exams).filter(([c]) => courses.has(c));
+}
+
+// Quick glimpse: how close each exam is and how ready the course looks, plus a
+// gentle nudge after a long gap.
+function renderStrip(base){
+  const today = todayStr();
+  const lines = examsInScope(base)
+    .filter(([, d]) => d >= today)
+    .sort((a, b) => a[1].localeCompare(b[1]))
+    .slice(0, 3)
+    .map(([c, d]) => {
+      const ts = topics.filter(t => t.cat && topOf(t.cat) === c);
+      const fresh = ts.filter(t => !t.last).length;
+      const weak = ts.filter(isWeak).length;
+      const n = daysBetween(today, d);
+      const when = n === 0 ? 'today' : n === 1 ? 'tomorrow' : `in ${n} days`;
+      const bits = [];
+      if(fresh) bits.push(`${fresh} not yet reviewed`);
+      if(weak) bits.push(`${weak} shaky`);
+      if(!bits.length) bits.push('everything reviewed');
+      return `<button class="strip-line" data-c="${escapeHtml(c)}" onclick="setActiveCategory(this.dataset.c)" title="Show ${escapeHtml(c)}"><b>${escapeHtml(c)}</b> · exam ${when} · ${bits.join(' · ')}</button>`;
+    });
+  const live = topics.filter(t => !isArchivedPath(t.cat));
+  const lastTs = live.reduce((m, t) => Math.max(m, t.last || 0), 0);
+  const dueNow = live.filter(t => t.due <= today).length;
+  const gap = lastTs ? Math.floor((Date.now() - lastTs) / 864e5) : 0;
+  if(gap >= 7 && dueNow){
+    lines.push(`<div class="strip-line nudge">You haven’t reviewed in ${gap} days · ${plural(dueNow, 'topic')} waiting</div>`);
+  }
+  document.getElementById('strip').innerHTML = lines.join('');
 }
 
 function navItem(node, opts){
@@ -1127,7 +1339,7 @@ function navItem(node, opts){
       ? `<button class="caret ${opts.expanded?'open':''}" onclick="event.stopPropagation(); toggleNode(${i})" aria-label="${opts.expanded?'Collapse':'Expand'} ${escapeHtml(node.label)}" aria-expanded="${opts.expanded}">▶</button>`
       : `<span class="caret-spacer"></span>`;
   }
-  const tip = `${node.count} topic${node.count===1?'':'s'}${node.due ? ` · ${node.due} due` : ''}`;
+  const tip = `${node.count} topic${node.count===1?'':'s'}${node.due ? ` · ${node.due} due` : ''}${node.weak ? ` · ${node.weak} shaky` : ''}`;
   return `<div class="${classes.join(' ')}" onclick="selectNode(${i})" title="${escapeHtml(node.label)} — ${tip}">
     ${lead}<span class="si-label">${escapeHtml(node.label)}</span>
     <span class="si-right">
@@ -1213,7 +1425,7 @@ function toggleArchivedList(){
 }
 
 function setActiveCategory(cat, rerender = true){
-  if(cat !== activeCategory){ selected.clear(); shown.due = shown.up = PAGE; }
+  if(cat !== activeCategory){ selected.clear(); shown.due = shown.up = shown.weak = PAGE; }
   activeCategory = cat;
   if(addField) addField.setValue(prefillPath());
   try{
@@ -1237,6 +1449,8 @@ function openEdit(i){
   input.value = editingPath;
   document.getElementById('archiveBtn').textContent = meta.archived.includes(editingPath) ? 'Unarchive' : 'Archive';
   updateEditHint();
+  document.getElementById('examRow').hidden = editingPath.includes(SEP);
+  document.getElementById('examInput').value = meta.exams[editingPath] || '';
   document.getElementById('editPanel').classList.add('open');
   input.focus();
   input.select();
@@ -1284,6 +1498,14 @@ function renamePath(from, to){
   topics.forEach(t=>{ if(within(t.cat, from)) t.cat = normPath(re(t.cat)); });
   meta.archived = [...new Set(meta.archived.map(re))];
   meta.expanded = [...new Set(meta.expanded.map(re))];
+  if(!from.includes(SEP) && meta.exams[from]){
+    const d = meta.exams[from];
+    delete meta.exams[from];
+    if(!to.includes(SEP)){
+      const other = meta.exams[to];
+      meta.exams[to] = other && other < d ? other : d;
+    }
+  }
   if(to.includes(SEP) && !meta.expanded.includes(topOf(to))) meta.expanded.push(topOf(to));
   if(activeCategory && activeCategory !== UNCAT) activeCategory = re(activeCategory);
 }
@@ -1292,13 +1514,30 @@ function saveEdit(){
   if(!editingPath) return;
   const target = editTarget();
   if(!target) return;
-  if(target !== editingPath){
-    renamePath(editingPath, target);
+  const from = editingPath;
+  const wasCourse = !from.includes(SEP);
+  const examVal = document.getElementById('examInput').value;
+  if(target !== from){
+    renamePath(from, target);
     setActiveCategory(activeCategory, false);
-    save(); saveMeta();
   }
+  let moved = [];
+  if(wasCourse && !target.includes(SEP)){
+    const next = DATE_RE.test(examVal) ? examVal : '';
+    if(next !== (meta.exams[target] || '')){
+      if(next) meta.exams[target] = next; else delete meta.exams[target];
+      moved = applyExamCap(target);
+    }
+  }
+  save(); saveMeta();
   closeEdit();
   render();
+  if(moved.length){
+    showToast(`Pulled ${plural(moved.length, 'review')} in so ${moved.length === 1 ? 'it lands' : 'they land'} before the exam`, () => {
+      moved.forEach(m => { const t = topics.find(x => x.id === m.id); if(t) t.due = m.due; });
+      save(); render();
+    });
+  }
 }
 
 function toggleArchiveEditing(){
@@ -1492,7 +1731,119 @@ document.getElementById('catSearch').addEventListener('input', e=>{
   sidebarQuery = e.target.value;
   renderSidebar();
 });
-const panelClosers = {panel: closePanel, editPanel: closeEdit, movePanel: closeMove, confirmPanel: closeConfirm};
+// Import: an outline or markdown export becomes topics. "# " = course,
+// "## " = chapter, bullets and deeper headings = topics. The path box above the
+// text is the default home for anything not under a heading.
+let importField = null;
+
+function mdClean(s){
+  return s
+    .replace(/\[\[([^\]|]*\|)?([^\]]+)\]\]/g, '$2')
+    .replace(/\*\*|__|`/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .replace(/:$/, '');
+}
+function importItem(raw){
+  let link = '';
+  let text = raw.replace(/\[([^\]]+)\]\(((?:https?|obsidian):\/\/[^)\s]+)\)/gi, (m, label, url) => {
+    if(!link) link = url;
+    return label;
+  });
+  const parsed = splitLink(text);
+  if(!link) link = parsed.link;
+  const name = mdClean(parsed.name).slice(0, 120) || (link ? fallbackName(link) : '');
+  return {name, link};
+}
+function parseImport(text, defaultPath){
+  const base = splitPath(defaultPath);
+  let course = '', chapter = '';
+  const out = [];
+  String(text).split(/\r?\n/).forEach(rawLine => {
+    let line = rawLine.trim();
+    if(!line || /^([-*_])\1{2,}$/.test(line)) return;
+    const h = line.match(/^(#{1,6})\s+(.*)$/);
+    if(h && h[1].length <= 2){
+      const label = mdClean(splitLink(h[2]).name);
+      if(!label) return;
+      if(h[1].length === 1){ course = label; chapter = ''; } else chapter = label;
+      return;
+    }
+    line = h ? h[2] : line.replace(/^(?:[-*+]|\d+[.)])\s+/, '').replace(/^\[[ xX]\]\s*/, '');
+    const item = importItem(line);
+    if(!item.name) return;
+    const courseName = course || base[0] || '';
+    const chapterName = chapter || (course ? '' : base[1] || '');
+    out.push({...item, cat: [courseName, chapterName].filter(Boolean).join(SEP)});
+  });
+  return out;
+}
+function importPlan(){
+  const items = parseImport(document.getElementById('importText').value, importField.getValue());
+  const seen = new Set(topics.map(t => (t.cat || '').toLowerCase() + '|' + t.name.toLowerCase()));
+  const fresh = [];
+  let dupes = 0;
+  items.forEach(it => {
+    const cat = canonicalCat(it.cat);
+    const key = cat.toLowerCase() + '|' + it.name.toLowerCase();
+    if(seen.has(key)){ dupes++; return; }
+    seen.add(key);
+    fresh.push({...it, cat});
+  });
+  return {fresh, dupes};
+}
+function updateImportHint(){
+  const {fresh, dupes} = importPlan();
+  const hint = document.getElementById('importHint');
+  hint.textContent = fresh.length || dupes
+    ? `${plural(fresh.length, 'topic')} to add${dupes ? ` · ${dupes} already here` : ''}.`
+    : '';
+  document.getElementById('importGo').disabled = !fresh.length;
+}
+function openImport(){
+  document.getElementById('importText').value = '';
+  importField.setValue(prefillPath());
+  updateImportHint();
+  document.getElementById('importPanel').classList.add('open');
+  document.getElementById('importText').focus();
+}
+function closeImport(){
+  importField.close();
+  document.getElementById('importPanel').classList.remove('open');
+}
+function doImport(){
+  const {fresh} = importPlan();
+  if(!fresh.length) return;
+  const added = [];
+  fresh.forEach(it => {
+    unarchiveFor(it.cat);
+    added.push(pushTopic(it.name, it.cat, it.link).id);
+    if(it.cat.includes(SEP) && !meta.expanded.includes(topOf(it.cat))) meta.expanded.push(topOf(it.cat));
+  });
+  closeImport();
+  save(); saveMeta(); render();
+  showToast(`Imported ${plural(added.length, 'topic')}`, () => {
+    const ids = new Set(added);
+    topics = topics.filter(t => !ids.has(t.id));
+    save(); saveMeta(); render();
+  });
+}
+importField = createPathField(document.getElementById('importPath'), {onEnter: () => {}, onChange: updateImportHint});
+document.getElementById('importText').addEventListener('input', updateImportHint);
+document.getElementById('importFile').addEventListener('change', async e => {
+  const files = [...e.target.files];
+  e.target.value = '';
+  const area = document.getElementById('importText');
+  for(const f of files){
+    try{
+      const text = await f.text();
+      area.value += (area.value && !area.value.endsWith('\n') ? '\n' : '') + text + '\n';
+    }catch(err){}
+  }
+  updateImportHint();
+});
+
+const panelClosers = {panel: closePanel, editPanel: closeEdit, movePanel: closeMove, importPanel: closeImport, confirmPanel: closeConfirm};
 document.querySelectorAll('.panel').forEach(p=>p.addEventListener('click', e=>{
   if(e.target === p) panelClosers[p.id]();
 }));
