@@ -145,7 +145,7 @@ button{font-family:inherit; cursor:pointer; border:none;}
   background:var(--card); border:1px solid var(--accent); border-radius:6px; padding:3px 6px; margin:-4px 0 -4px -7px;
 }
 .tname-input:focus{outline:none;}
-.crumb{background:none; padding:0; font:inherit; color:inherit; border-radius:4px; text-align:left;}
+.crumb{display:inline; background:none; padding:0; font:inherit; color:inherit; border-radius:4px; text-align:left;}
 .crumb:hover{color:var(--accent); text-decoration:underline; text-underline-offset:3px;}
 .crumb:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
 .crumb.ghost{opacity:0; transition:opacity .15s ease;}
@@ -271,6 +271,38 @@ body.selecting .toast{bottom:calc(84px + env(safe-area-inset-bottom, 0px));}
 @media (max-width:700px){ body.selecting .toast{bottom:calc(120px + env(safe-area-inset-bottom, 0px));} }
 .toast span{overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
 .toast button{background:none; color:var(--bg); font-weight:700; font-size:0.86rem; padding:4px 8px; border-radius:6px; text-decoration:underline; text-underline-offset:3px;}
+.cal-head{display:flex; align-items:center; gap:4px; margin:0 0 12px;}
+.cal-title{font-family:"Source Serif 4",Georgia,serif; font-size:1.08rem; font-weight:600; margin-right:auto;}
+.cal-nav{background:none; color:var(--ink-dim); width:32px; height:32px; border-radius:7px; font-size:1.15rem; line-height:1;}
+.cal-nav:hover{background:var(--accent-soft); color:var(--accent);}
+.cal-grid{display:grid; grid-template-columns:repeat(7, minmax(0, 1fr)); gap:4px;}
+.cal-dow{font-size:0.7rem; color:var(--ink-dim); text-align:center; padding:0 0 4px; font-weight:600;}
+.cal-day{
+  position:relative; aspect-ratio:1 / 0.8; min-width:0; display:flex; flex-direction:column; justify-content:space-between; align-items:flex-start;
+  padding:6px 7px; border:1px solid var(--line); border-radius:8px; background:var(--card); color:var(--ink); font-size:0.8rem;
+}
+.cal-day:hover{border-color:var(--ink-dim);}
+.cal-day.other{opacity:0.4;}
+.cal-day.past .cal-num{color:var(--ink-dim);}
+.cal-day.today{border-color:var(--accent);}
+.cal-day.today .cal-num{color:var(--accent); font-weight:700;}
+.cal-day.sel{outline:2px solid var(--accent); outline-offset:1px;}
+.cal-day.l1{background:color-mix(in srgb, var(--due) 10%, var(--card));}
+.cal-day.l2{background:color-mix(in srgb, var(--due) 20%, var(--card));}
+.cal-day.l3{background:color-mix(in srgb, var(--due) 32%, var(--card));}
+.cal-day.l4{background:color-mix(in srgb, var(--due) 45%, var(--card));}
+.cal-count{align-self:flex-end; font-size:0.74rem; font-weight:700; color:var(--due);}
+.cal-dot{display:none;}
+.cal-list-head{margin-top:22px;}
+@media (max-width:700px){
+  .view-label{display:none;}
+  .sortrow{justify-content:flex-end;}
+  .seg{padding:6px 9px;}
+  .cal-grid{gap:3px;}
+  .cal-day{aspect-ratio:1; padding:0; align-items:center; justify-content:center; font-size:0.8rem;}
+  .cal-count{display:none;}
+  .cal-dot{display:block; position:absolute; bottom:5px; left:50%; width:5px; height:5px; margin-left:-2.5px; border-radius:50%; background:var(--due);}
+}
 ::-webkit-scrollbar{width:0;height:0;}
 </style>
 </head>
@@ -300,12 +332,13 @@ body.selecting .toast{bottom:calc(84px + env(safe-area-inset-bottom, 0px));}
   </div>
 
   <div class="sortrow">
-    <span class="section-label" style="margin:0;">Sort</span>
+    <span class="section-label view-label" style="margin:0;">View</span>
     <div class="sort-right">
       <button class="linkbtn" id="selectBtn" onclick="toggleSelect()">Select</button>
       <div class="segctrl">
         <button class="seg active" id="segDue" onclick="setSort('due')">Due date</button>
         <button class="seg" id="segCat" onclick="setSort('cat')">Category</button>
+        <button class="seg" id="segCal" onclick="setSort('cal')">Calendar</button>
       </div>
     </div>
   </div>
@@ -319,6 +352,7 @@ body.selecting .toast{bottom:calc(84px + env(safe-area-inset-bottom, 0px));}
   </div>
 
   <div id="catView" style="display:none;"></div>
+  <div id="calView" style="display:none;"></div>
 </div>
 </div>
 
@@ -432,7 +466,7 @@ function load(){
   });
   try{
     const s = localStorage.getItem(SORT_KEY);
-    if(s === 'due' || s === 'cat') sortMode = s;
+    if(s === 'due' || s === 'cat' || s === 'cal') sortMode = s;
   }catch(e){}
   try{
     const c = localStorage.getItem(CAT_KEY);
@@ -453,6 +487,8 @@ function setSort(mode){
   document.getElementById('segCat').classList.toggle('active', mode==='cat');
   document.getElementById('dueView').style.display = mode==='due' ? '' : 'none';
   document.getElementById('catView').style.display = mode==='cat' ? '' : 'none';
+  document.getElementById('segCal').classList.toggle('active', mode==='cal');
+  document.getElementById('calView').style.display = mode==='cal' ? '' : 'none';
   render();
 }
 function save(){
@@ -463,11 +499,14 @@ function saveMeta(){
   meta.expanded = meta.expanded.filter(p => topics.some(t => within(t.cat, p)));
   try{ localStorage.setItem(META_KEY, JSON.stringify(meta)); }catch(e){}
 }
-function todayStr(){ return new Date().toISOString().slice(0,10); }
+function isoLocal(d){
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function todayStr(){ return isoLocal(new Date()); }
 function addDays(dateStr, n){
   const d = new Date(dateStr+'T00:00:00');
   d.setDate(d.getDate()+n);
-  return d.toISOString().slice(0,10);
+  return isoLocal(d);
 }
 function fmtDate(dateStr){
   const d = new Date(dateStr+'T00:00:00');
@@ -609,8 +648,12 @@ function toggleSelected(id){
   if(row) row.focus({preventScroll: true});
 }
 
+function shownTopics(){
+  return sortMode === 'cal' ? calDayTopics(visibleTopics()) : visibleTopics();
+}
+
 function toggleSelectAll(){
-  const ids = visibleTopics().map(t => t.id);
+  const ids = shownTopics().map(t => t.id);
   const all = ids.length && ids.every(id => selected.has(id));
   if(all) ids.forEach(id => selected.delete(id));
   else ids.forEach(id => selected.add(id));
@@ -618,7 +661,7 @@ function toggleSelectAll(){
 }
 
 function updateSelBar(){
-  const visible = visibleTopics();
+  const visible = shownTopics();
   const n = selected.size;
   document.getElementById('selCount').textContent = n ? `${n} selected` : 'Tap topics to select';
   document.getElementById('selMoveBtn').disabled = !n;
@@ -877,6 +920,92 @@ function visibleTopics(){
 
 const byDue = (a,b)=>a.due.localeCompare(b.due);
 
+let calMonth = null;
+let calDay = null;
+
+function monthStart(dateStr){ return dateStr.slice(0, 8) + '01'; }
+function shiftMonth(dateStr, n){
+  const d = new Date(dateStr + 'T00:00:00');
+  d.setDate(1);
+  d.setMonth(d.getMonth() + n);
+  return isoLocal(d);
+}
+
+// Overdue topics are shown on today so nothing hides in past days.
+function calDateOf(t, today){ return t.due < today ? today : t.due; }
+
+function calDayTopics(list){
+  const today = todayStr();
+  const day = calDay || today;
+  return list.filter(t => calDateOf(t, today) === day).sort(byDue);
+}
+
+function calNav(n){
+  calMonth = n === 0 ? monthStart(todayStr()) : shiftMonth(calMonth || monthStart(todayStr()), n);
+  if(n === 0) calDay = todayStr();
+  render();
+}
+function calPick(day){
+  calDay = day;
+  if(monthStart(day) !== calMonth) calMonth = monthStart(day);
+  render();
+}
+
+function calendarHtml(list){
+  const today = todayStr();
+  if(!calMonth) calMonth = monthStart(today);
+  const day = calDay || today;
+  const counts = new Map();
+  list.forEach(t => { const d = calDateOf(t, today); counts.set(d, (counts.get(d) || 0) + 1); });
+
+  const first = new Date(calMonth + 'T00:00:00');
+  const gridStart = new Date(first);
+  gridStart.setDate(1 - first.getDay());
+  const last = new Date(first.getFullYear(), first.getMonth() + 1, 0);
+  const weeks = Math.ceil((first.getDay() + last.getDate()) / 7);
+
+  const dow = [...Array(7)].map((_, i) => {
+    const d = new Date(gridStart); d.setDate(gridStart.getDate() + i);
+    return `<div class="cal-dow">${d.toLocaleDateString(undefined, {weekday: 'short'})}</div>`;
+  }).join('');
+
+  let cells = '';
+  for(let i = 0; i < weeks * 7; i++){
+    const d = new Date(gridStart); d.setDate(gridStart.getDate() + i);
+    const iso = isoLocal(d);
+    const n = counts.get(iso) || 0;
+    const level = n === 0 ? 0 : n <= 2 ? 1 : n <= 5 ? 2 : n <= 9 ? 3 : 4;
+    const cls = ['cal-day'];
+    if(d.getMonth() !== first.getMonth()) cls.push('other');
+    if(iso < today) cls.push('past');
+    if(iso === today) cls.push('today');
+    if(iso === day) cls.push('sel');
+    if(level) cls.push('l' + level);
+    const label = d.toLocaleDateString(undefined, {weekday: 'long', month: 'long', day: 'numeric'}) + (n ? `, ${plural(n, 'topic')}` : '');
+    cells += `<button class="${cls.join(' ')}" onclick="calPick('${iso}')" aria-label="${escapeHtml(label)}" aria-pressed="${iso === day}">
+      <span class="cal-num">${d.getDate()}</span>${n ? `<span class="cal-count">${n}</span><span class="cal-dot"></span>` : ''}
+    </button>`;
+  }
+
+  const items = calDayTopics(list);
+  const dayLabel = day === today ? 'Today' : new Date(day + 'T00:00:00').toLocaleDateString(undefined, {weekday: 'short', month: 'short', day: 'numeric'});
+  const title = first.toLocaleDateString(undefined, {month: 'long', year: 'numeric'});
+  const onTodayMonth = calMonth === monthStart(today) && day === today;
+
+  return `
+    <div class="cal-head">
+      <span class="cal-title">${escapeHtml(title)}</span>
+      ${onTodayMonth ? '' : `<button class="linkbtn" onclick="calNav(0)">Today</button>`}
+      <button class="cal-nav" onclick="calNav(-1)" aria-label="Previous month">‹</button>
+      <button class="cal-nav" onclick="calNav(1)" aria-label="Next month">›</button>
+    </div>
+    <div class="cal-grid">${dow}${cells}</div>
+    <p class="section-label cal-list-head">${escapeHtml(dayLabel)}${items.length ? ` · ${items.length}` : ''}</p>
+    ${items.length
+      ? items.map(t => rowHtml(t, t.due <= today)).join('')
+      : `<div class="empty">${day < today ? 'Past days are empty — anything overdue shows on today.' : 'Nothing scheduled for this day.'}</div>`}`;
+}
+
 function render(){
   if(activeCategory !== null && !topics.some(t => within(t.cat, activeCategory))) setActiveCategory(null, false);
   const ids = new Set(topics.map(t => t.id));
@@ -889,13 +1018,19 @@ function render(){
   document.getElementById('dueLabel').textContent = due.length ? `Due today · ${due.length}` : 'Due today';
 
   const dueEl = document.getElementById('dueList');
-  dueEl.innerHTML = due.length ? due.map(t=>rowHtml(t, true)).join('') : `<div class="empty">${activeCategory ? 'Nothing due in this category.' : 'Nothing due — nice work. Add a topic above.'}</div>`;
-
   const upEl = document.getElementById('upcomingList');
-  upEl.innerHTML = upcoming.length ? upcoming.map(t=>rowHtml(t, false)).join('') : `<div class="empty">No upcoming topics${activeCategory ? ' in this category' : ''}.</div>`;
+  const catEl = document.getElementById('catView');
+  const calEl = document.getElementById('calView');
+  dueEl.innerHTML = upEl.innerHTML = catEl.innerHTML = calEl.innerHTML = '';
+
+  if(sortMode === 'due'){
+    dueEl.innerHTML = due.length ? due.map(t=>rowHtml(t, true)).join('') : `<div class="empty">${activeCategory ? 'Nothing due in this category.' : 'Nothing due — nice work. Add a topic above.'}</div>`;
+    upEl.innerHTML = upcoming.length ? upcoming.map(t=>rowHtml(t, false)).join('') : `<div class="empty">No upcoming topics${activeCategory ? ' in this category' : ''}.</div>`;
+  }
+
+  if(sortMode === 'cal') calEl.innerHTML = calendarHtml(base);
 
   if(sortMode === 'cat'){
-    const catEl = document.getElementById('catView');
     const tree = buildTree(base);
     if(!tree.length){
       catEl.innerHTML = `<div class="empty">No topics yet. Add one above.</div>`;
