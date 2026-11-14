@@ -18,7 +18,9 @@ A small amber dot next to a category means it has topics due today.
 
 ## Editing topics
 
-Click (or tap) a topic's name to rename it in place. Enter or clicking away saves; Escape cancels. To change a topic's course or chapter, use *Select → Move*.
+Click (or tap) a topic's name to rename it in place. Enter or clicking away saves; Escape cancels.
+
+Click the course line under a topic (e.g. `Campbell Biology › Chapter 10`) to move it: pick a chapter to move it down a level, or backspace the chapter to file it under the course alone. Uncategorized topics show "Add to course" on hover. *Select → Move* does the same for many topics at once.
 
 ## Selecting and clearing
 
